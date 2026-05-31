@@ -27,7 +27,6 @@ fun App() {
     var currentScreenName by rememberSaveable {
         mutableStateOf("Splash")
     }
-    var showStartupScreen by remember { mutableStateOf(false) }
     var currentScreen by remember(currentScreenName) {
         mutableStateOf(
             when (currentScreenName) {
@@ -59,10 +58,10 @@ fun App() {
             when (screen) {
                 is AuraScreen.Splash -> {
                     LaunchedEffect(Unit) {
-                        delay(3000)
+                        delay(100000L)
                         currentScreenName = "Onboarding"
                     }
-                    StartupScreen(onNavigateToHome = { showStartupScreen = false })
+                    StartupScreen()
                 }
                 is AuraScreen.Onboarding -> {
                     OnboardingScreen(onFinish = {

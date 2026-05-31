@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,12 +57,12 @@ fun OnboardingScreen(
                 emoji = "✨",
                 title = "Quản lý công việc dễ dàng",
                 description = "Theo dõi và gạch bỏ những mục tiêu cần hoàn thành trong ngày ngay tại phòng học để luôn làm chủ tiến độ của bản thân.",
-                highlightColor = AuraColors.MainAppMode ?: AuraColors.LongBreakMode
+                highlightColor = AuraColors.MainAppMode
             )
         )
     }
 
-    var currentStep by remember { mutableStateOf(0) }
+    var currentStep by rememberSaveable { mutableStateOf(0) }
     val currentData = steps[currentStep]
 
     AuraBackground(blurRadius = 8f, overlayAlpha = 0.6f) {
