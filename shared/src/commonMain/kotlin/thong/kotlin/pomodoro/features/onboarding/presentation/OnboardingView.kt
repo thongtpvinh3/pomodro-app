@@ -64,125 +64,227 @@ fun OnboardingScreen(
     var currentStep by remember { mutableStateOf(0) }
     val currentData = steps[currentStep]
 
-    // SỬ DỤNG: AuraBackground từ core với độ blur cao hơn (8dp) và nền tối hơn (60%)
-    // để người dùng không bị phân tâm bởi hình nền phía sau
     AuraBackground(blurRadius = 8f, overlayAlpha = 0.6f) {
+        BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+            val isLandscape = maxWidth > maxHeight
 
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 40.dp, bottom = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            // TẦNG TRÊN: Nút Bỏ qua (Skip) dành cho người dùng cũ muốn vào thẳng app
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Text(
-                    text = "Bỏ qua",
-                    color = AuraColors.TextSecondary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clickable { onFinish() } // Gọi callback kết thúc luồng
+            if (isLandscape) {
+                LandscapeOnboardingContent(
+                    currentStep = currentStep,
+                    steps = steps,
+                    currentData = currentData,
+                    onNext = { if (currentStep < steps.size - 1) currentStep++ else onFinish() },
+                    onSkip = onFinish
+                )
+            } else {
+                PortraitOnboardingContent(
+                    currentStep = currentStep,
+                    steps = steps,
+                    currentData = currentData,
+                    onNext = { if (currentStep < steps.size - 1) currentStep++ else onFinish() },
+                    onSkip = onFinish
                 )
             }
+        }
+    }
+}
 
-            // TẦNG GIỮA: Nội dung hướng dẫn được bọc trong GlassBox và có hiệu ứng lướt trang mượt mà
-            AnimatedContent(
-                targetState = currentData,
-                transitionSpec = {
-                    fadeIn(animationSpec = androidx.compose.animation.core.tween(300)) togetherWith
-                            fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
-                },
-                label = "OnboardingStepTransition",
-                modifier = Modifier.weight(1f).wrapContentHeight(Alignment.CenterVertically)
-            ) { data ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Vòng tròn chứa Emoji đại diện cho tính năng (SỬ DỤNG: GlassBox hình tròn)
-                    GlassBox(
-                        shape = CircleShape,
-                        modifier = Modifier.size(110.dp)
-                    ) {
-                        Text(text = data.emoji, fontSize = 44.sp)
-                    }
+@Composable
+private fun PortraitOnboardingContent(
+    currentStep: Int,
+    steps: List<OnboardingStep>,
+    currentData: OnboardingStep,
+    onNext: () -> Unit,
+    onSkip: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+            .padding(top = 40.dp, bottom = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        SkipButton(onSkip = onSkip)
 
-                    Spacer(modifier = Modifier.height(32.dp))
+        AnimatedContent(
+            targetState = currentData,
+            transitionSpec = {
+                fadeIn(animationSpec = androidx.compose.animation.core.tween(300)) togetherWith
+                        fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+            },
+            label = "OnboardingStepTransition",
+            modifier = Modifier.weight(1f).wrapContentHeight(Alignment.CenterVertically)
+        ) { data ->
+            OnboardingInfoColumn(data = data)
+        }
 
-                    // Tiêu đề bước hướng dẫn
-                    Text(
-                        text = data.title,
-                        color = AuraColors.TextPrimary,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
-                    )
+        OnboardingControls(
+            currentStep = currentStep,
+            steps = steps,
+            currentData = currentData,
+            onNext = onNext
+        )
+    }
+}
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Đoạn văn miêu tả chi tiết
-                    Text(
-                        text = data.description,
-                        color = AuraColors.TextSecondary,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        lineHeight = 22.sp,
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    )
-                }
-            }
-
-            // TẦNG DƯỚI: Thanh chỉ báo (Dots Indicator) và Nút bấm hành động
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+@Composable
+private fun LandscapeOnboardingContent(
+    currentStep: Int,
+    steps: List<OnboardingStep>,
+    currentData: OnboardingStep,
+    onNext: () -> Unit,
+    onSkip: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left side: Visual (Emoji)
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            GlassBox(
+                shape = CircleShape,
+                modifier = Modifier.size(140.dp)
             ) {
-                // 1. Dấu chấm chỉ số trang (Dots Indicator)
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(bottom = 32.dp)
-                ) {
-                    steps.forEachIndexed { index, step ->
-                        val isSelected = index == currentStep
-                        // Nếu chọn thì thanh sẽ dài ra và đổi theo màu đặc trưng của bước đó
-                        val width = if (isSelected) 24.dp else 8.dp
-                        val color = if (isSelected) step.highlightColor else Color.White.copy(alpha = 0.2f)
-
-                        Box(
-                            modifier = Modifier
-                                .size(height = 8.dp, width = width)
-                                .background(color, RoundedCornerShape(50))
-                                .animateContentSize() // Hiệu ứng giãn chấm mượt mà
-                        )
-                    }
-                }
-
-                // 2. Nút bấm hành động (SỬ DỤNG: AuraButton co giãn vật lý từ core)
-                AuraButton(
-                    onClick = {
-                        if (currentStep < steps.size - 1) {
-                            currentStep++ // Đi tiếp trang sau
-                        } else {
-                            onFinish() // Đã đến trang cuối, kích hoạt vào thẳng MainApp
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (currentStep == steps.size - 1) "Bắt đầu ngay" else "Tiếp tục",
-                        color = if (currentStep == steps.size - 1) currentData.highlightColor else Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
+                Text(text = currentData.emoji, fontSize = 60.sp)
             }
+        }
+
+        // Right side: Info and Controls
+        Column(
+            modifier = Modifier.weight(1.2f).padding(start = 24.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            SkipButton(onSkip = onSkip, modifier = Modifier.align(Alignment.End))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = currentData.title,
+                color = AuraColors.TextPrimary,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Start
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = currentData.description,
+                color = AuraColors.TextSecondary,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Start,
+                lineHeight = 22.sp
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OnboardingControls(
+                currentStep = currentStep,
+                steps = steps,
+                currentData = currentData,
+                onNext = onNext
+            )
+        }
+    }
+}
+
+@Composable
+private fun OnboardingInfoColumn(data: OnboardingStep) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        GlassBox(
+            shape = CircleShape,
+            modifier = Modifier.size(110.dp)
+        ) {
+            Text(text = data.emoji, fontSize = 44.sp)
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = data.title,
+            color = AuraColors.TextPrimary,
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = data.description,
+            color = AuraColors.TextSecondary,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            lineHeight = 22.sp,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun SkipButton(onSkip: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End
+    ) {
+        Text(
+            text = "Bỏ qua",
+            color = AuraColors.TextSecondary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable { onSkip() }
+        )
+    }
+}
+
+@Composable
+private fun OnboardingControls(
+    currentStep: Int,
+    steps: List<OnboardingStep>,
+    currentData: OnboardingStep,
+    onNext: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(bottom = 32.dp)
+        ) {
+            steps.forEachIndexed { index, step ->
+                val isSelected = index == currentStep
+                val width = if (isSelected) 24.dp else 8.dp
+                val color = if (isSelected) step.highlightColor else Color.White.copy(alpha = 0.2f)
+
+                Box(
+                    modifier = Modifier
+                        .size(height = 8.dp, width = width)
+                        .background(color, RoundedCornerShape(50))
+                        .animateContentSize()
+                )
+            }
+        }
+
+        AuraButton(
+            onClick = onNext,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = if (currentStep == steps.size - 1) "Bắt đầu ngay" else "Tiếp tục",
+                color = if (currentStep == steps.size - 1) currentData.highlightColor else Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
         }
     }
 }
