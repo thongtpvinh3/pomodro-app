@@ -1,14 +1,15 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
+    jvmToolchain(17)
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -35,9 +36,6 @@ kotlin {
        compileSdk = libs.versions.android.compileSdk.get().toInt()
        minSdk = libs.versions.android.minSdk.get().toInt()
     
-       compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
-       }
        androidResources {
            enable = true
        }
@@ -49,6 +47,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.sqldelight.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -60,6 +59,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
+            implementation(libs.sqldelight.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -69,6 +69,15 @@ kotlin {
         }
     }
 }
+
+//sqldelight {
+//    databases {
+//        create("AuraDatabase") {
+//            // Package chứa các class Kotlin được tự động sinh ra
+//            packageName.set("com.aura.pomodoro.core.database")
+//        }
+//    }
+//}
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)

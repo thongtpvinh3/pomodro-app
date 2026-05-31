@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.timer.viewmodel
+package thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -8,9 +8,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import thong.kotlin.pomodoro.features.timer.domain.EventType
-import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
-import thong.kotlin.pomodoro.features.timer.model.PomodoroUiState
+import kotlin.random.Random
+import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
+import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
+import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
+import thong.kotlin.pomodoro.features.pomodoro.task.Task
+import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
+import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
@@ -21,6 +25,15 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
+        // Initial mock tasks for testing
+        _uiState.update {
+            it.copy(
+                tasks = listOf(
+                    Task("1", "Hoàn thành UI lõi"),
+                    Task("2", "Đọc sách 15 phút")
+                )
+            )
+        }
         if (initialState.isActive) {
             resumeTimerAfterRestore()
         }
@@ -28,6 +41,19 @@ class PomodoroViewModel(
 
     // Quản lý Job đếm ngược của Coroutines để có thể hủy (Cancel) bất cứ lúc nào
     private var timerJob: Job? = null
+
+    fun updateConfig(config: PomodoroConfig) {
+        timerJob?.cancel()
+
+        _uiState.update {
+            it.copy(
+                config = config,
+                isActive = false,
+                timeLeft = it.currentMode.totalSeconds(config),
+                event = EventType.NOTHING
+            )
+        }
+    }
 
     /**
      * Nút bấm chính: Chuyển đổi qua lại giữa Bắt đầu (Play) và Tạm dừng (Pause)
@@ -80,7 +106,7 @@ class PomodoroViewModel(
         _uiState.update {
             it.copy(
                 isActive = false,
-                timeLeft = it.currentMode.totalSeconds,
+                timeLeft = it.currentMode.totalSeconds(it.config).toLong(),
                 event = EventType.NOTHING
             )
         }
@@ -157,6 +183,39 @@ class PomodoroViewModel(
                     event = EventType.BREAK_END
                 )
             }
+        }
+    }
+
+    fun onNewTaskTextChange(text: String) {
+        _uiState.update { it.copy(newTaskText = text) }
+    }
+
+    fun addTask() {
+        val text = _uiState.value.newTaskText
+        if (text.isNotBlank()) {
+            _uiState.update {
+                val newTask = Task(id = Random.nextInt().toString(), text = text)
+                it.copy(
+                    tasks = listOf(newTask) + it.tasks,
+                    newTaskText = ""
+                )
+            }
+        }
+    }
+
+    fun deleteTask(taskId: String) {
+        _uiState.update { state ->
+            state.copy(tasks = state.tasks.filter { it.id != taskId })
+        }
+    }
+
+    fun toggleTask(taskId: String) {
+        _uiState.update { state ->
+            state.copy(
+                tasks = state.tasks.map {
+                    if (it.id == taskId) it.copy(isCompleted = !it.isCompleted) else it
+                }
+            )
         }
     }
 

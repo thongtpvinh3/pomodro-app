@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.timer.domain
+package thong.kotlin.pomodoro.features.pomodoro.timer.domain
 
 enum class PomodoroMode(val label: String, val totalSeconds: Long) {
     STARTUP("Chưa làm gì", 0),

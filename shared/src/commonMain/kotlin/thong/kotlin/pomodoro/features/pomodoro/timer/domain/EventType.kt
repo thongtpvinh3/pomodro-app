@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.timer.domain
+package thong.kotlin.pomodoro.features.pomodoro.timer.domain
 
 enum class EventType {
     CLICK_START_WORK,
