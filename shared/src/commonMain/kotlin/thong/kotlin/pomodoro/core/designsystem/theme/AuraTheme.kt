@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.core.designsystem
+package thong.kotlin.pomodoro.core.designsystem.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme

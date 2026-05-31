@@ -1,6 +1,7 @@
-package thong.kotlin.pomodoro.core.designsystem
+package thong.kotlin.pomodoro.core.navigation
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -27,8 +28,8 @@ fun AuraNavigator(
         targetState = currentScreen,
         transitionSpec = {
             // Hiệu ứng mượt mà khi đổi màn hình (Fade In + Fade Out trong 400ms)
-            fadeIn(animationSpec = androidx.compose.animation.core.tween(400)) togetherWith
-                    fadeOut(animationSpec = androidx.compose.animation.core.tween(400))
+            fadeIn(animationSpec = tween(400)) togetherWith
+                    fadeOut(animationSpec = tween(400))
         },
         label = "ScreenTransitionAnimation"
     ) { screen ->

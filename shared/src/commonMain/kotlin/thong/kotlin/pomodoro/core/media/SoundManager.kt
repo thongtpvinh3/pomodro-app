@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.core.designsystem.components
+package thong.kotlin.pomodoro.core.media
 
 /**
  * Bản hợp đồng quản lý âm thanh dùng chung cho toàn bộ dự án KMP

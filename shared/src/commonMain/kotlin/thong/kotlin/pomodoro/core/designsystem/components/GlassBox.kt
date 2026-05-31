@@ -15,8 +15,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.*
-import thong.kotlin.pomodoro.core.designsystem.AuraAnimations
-import thong.kotlin.pomodoro.core.designsystem.AuraGradients
+import thong.kotlin.pomodoro.core.designsystem.theme.AuraAnimations
+import thong.kotlin.pomodoro.core.designsystem.theme.AuraGradients
 
 @Composable
 fun GlassBox(

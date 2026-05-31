@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.core.designsystem
+package thong.kotlin.pomodoro.core.designsystem.theme
 
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.TweenSpec

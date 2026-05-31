@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.core.designsystem
+package thong.kotlin.pomodoro.core.designsystem.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes

@@ -38,8 +38,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import thong.kotlin.pomodoro.core.designsystem.AuraColors
-import thong.kotlin.pomodoro.core.designsystem.AuraGradients
+import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
+import thong.kotlin.pomodoro.core.designsystem.theme.AuraGradients
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
 import thong.kotlin.pomodoro.core.designsystem.components.AuraButton
 import thong.kotlin.pomodoro.core.designsystem.components.AuraCheckbox
