@@ -1,9 +1,9 @@
-package thong.kotlin.pomodoro.features.timer.presentation
+package thong.kotlin.pomodoro.features.timer.state
 
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import thong.kotlin.pomodoro.features.timer.domain.EventType
 import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
+import thong.kotlin.pomodoro.features.timer.model.PomodoroUiState
 
 val PomodoroUiStateSaver = listSaver<PomodoroUiState, Any>(
     save = {

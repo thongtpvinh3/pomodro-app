@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.timer.presentation
+package thong.kotlin.pomodoro.features.timer.viewmodel
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import thong.kotlin.pomodoro.features.timer.domain.EventType
 import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
+import thong.kotlin.pomodoro.features.timer.model.PomodoroUiState
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,

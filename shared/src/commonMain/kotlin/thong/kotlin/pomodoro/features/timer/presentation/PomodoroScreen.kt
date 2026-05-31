@@ -54,6 +54,8 @@ import thong.kotlin.pomodoro.core.designsystem.theme.AuraGradients
 import thong.kotlin.pomodoro.core.utils.formatToMmSs
 import thong.kotlin.pomodoro.features.timer.domain.EventType
 import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
+import thong.kotlin.pomodoro.features.timer.model.PomodoroUiState
+import thong.kotlin.pomodoro.features.timer.viewmodel.PomodoroViewModel
 
 @Composable
 fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {

@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.timer.presentation
+package thong.kotlin.pomodoro.features.timer.model
 
 import thong.kotlin.pomodoro.features.timer.domain.EventType
 import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
