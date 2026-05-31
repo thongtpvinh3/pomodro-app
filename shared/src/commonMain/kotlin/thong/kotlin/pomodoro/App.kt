@@ -58,7 +58,7 @@ fun App() {
             when (screen) {
                 is AuraScreen.Splash -> {
                     LaunchedEffect(Unit) {
-                        delay(100000L)
+                        delay(5000)
                         currentScreenName = "Onboarding"
                     }
                     StartupScreen()

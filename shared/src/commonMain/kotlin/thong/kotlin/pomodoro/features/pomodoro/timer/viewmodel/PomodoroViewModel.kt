@@ -25,15 +25,18 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        // Initial mock tasks for testing
-        _uiState.update {
-            it.copy(
-                tasks = listOf(
-                    Task("1", "Hoàn thành UI lõi"),
-                    Task("2", "Đọc sách 15 phút")
+        // Chỉ nạp mock tasks nếu danh sách task hiện tại đang trống (lần đầu mở app)
+        if (initialState.tasks.isEmpty()) {
+            _uiState.update {
+                it.copy(
+                    tasks = listOf(
+                        Task("1", "Hoàn thành UI lõi"),
+                        Task("2", "Đọc sách 15 phút")
+                    )
                 )
-            )
+            }
         }
+
         if (initialState.isActive) {
             resumeTimerAfterRestore()
         }
@@ -106,7 +109,7 @@ class PomodoroViewModel(
         _uiState.update {
             it.copy(
                 isActive = false,
-                timeLeft = it.currentMode.totalSeconds(it.config).toLong(),
+                timeLeft = it.currentMode.totalSeconds(it.config),
                 event = EventType.NOTHING
             )
         }
@@ -196,7 +199,7 @@ class PomodoroViewModel(
             _uiState.update {
                 val newTask = Task(id = Random.nextInt().toString(), text = text)
                 it.copy(
-                    tasks = listOf(newTask) + it.tasks,
+                    tasks = it.tasks + newTask,
                     newTaskText = ""
                 )
             }
