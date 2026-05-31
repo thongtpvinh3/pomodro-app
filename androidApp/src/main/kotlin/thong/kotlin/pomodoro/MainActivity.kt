@@ -6,11 +6,26 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Yêu cầu hệ thống cho phép ứng dụng vẽ tràn viền
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
+
+        // Ẩn thanh điều hướng ở dưới cùng
+        windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
+
+        // (Tùy chọn) Cho phép người dùng vuốt từ mép dưới lên để hiển thị lại thanh này trong chốc lát mà không làm xô lệch giao diện
+        windowInsetsController.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
             App()

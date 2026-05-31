@@ -8,12 +8,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import thong.kotlin.pomodoro.features.timer.domain.EventType
 import thong.kotlin.pomodoro.features.timer.domain.PomodoroMode
 
-class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
+class PomodoroViewModel(
+    private val viewModelScope: CoroutineScope,
+    initialState: PomodoroUiState = PomodoroUiState()
+) {
 
-    private val _uiState = MutableStateFlow(PomodoroUiState())
+    private val _uiState = MutableStateFlow(initialState)
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
+
+    init {
+        if (initialState.isActive) {
+            resumeTimerAfterRestore()
+        }
+    }
 
     // Quản lý Job đếm ngược của Coroutines để có thể hủy (Cancel) bất cứ lúc nào
     private var timerJob: Job? = null
@@ -30,7 +40,12 @@ class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
     }
 
     private fun startTimer() {
-        _uiState.update { it.copy(isActive = true) }
+        _uiState.update { currentState ->
+            currentState.copy(
+                isActive = true,
+                event = resolveStartEvent(currentState)
+            )
+        }
 
         // Hủy job cũ đề phòng trường hợp bị kích hoạt trùng lặp
         timerJob?.cancel()
@@ -47,8 +62,13 @@ class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
     }
 
     private fun pauseTimer() {
-        timerJob?.cancel() // Dừng luồng đếm ngược của Coroutines
-        _uiState.update { it.copy(isActive = false) }
+        timerJob?.cancel()
+        _uiState.update { currentState ->
+            currentState.copy(
+                isActive = false,
+                event = resolvePauseEvent(currentState)
+            )
+        }
     }
 
     /**
@@ -56,30 +76,64 @@ class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
      */
     fun resetTimer() {
         pauseTimer()
-        _uiState.update { it.copy(timeLeft = it.currentMode.totalSeconds) }
+        _uiState.update {
+            it.copy(
+                isActive = false,
+                timeLeft = it.currentMode.totalSeconds,
+                event = EventType.NOTHING
+            )
+        }
     }
 
     /**
      * Nút Bỏ qua (Skip): Ép kết thúc phiên hiện tại ngay lập tức
      */
     fun skipTimer() {
-        handleTimerComplete()
+        timerJob?.cancel()
+        val currentState = _uiState.value
+
+        if (currentState.currentMode == PomodoroMode.WORK) {
+            // Skip khi chưa học xong thì KHÔNG cộng pomodoro
+            _uiState.update {
+                it.copy(
+                    isActive = false,
+                    currentMode = PomodoroMode.SHORT_BREAK,
+                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds,
+                    event = EventType.NOTHING
+                )
+            }
+        } else {
+            // Skip khi đang nghỉ thì quay lại phiên WORK mới
+            _uiState.update {
+                it.copy(
+                    isActive = false,
+                    currentMode = PomodoroMode.WORK,
+                    timeLeft = PomodoroMode.WORK.totalSeconds,
+                    event = EventType.NOTHING
+                )
+            }
+        }
     }
 
     /**
      * Người dùng tự chọn thủ công Chế độ học ở thanh chọn dưới đáy
      */
     fun switchMode(mode: PomodoroMode) {
-        pauseTimer()
+        timerJob?.cancel()
         _uiState.update {
-            it.copy(currentMode = mode, timeLeft = mode.totalSeconds)
+            it.copy(
+                isActive = false,
+                currentMode = mode,
+                timeLeft = mode.totalSeconds,
+                event = EventType.NOTHING
+            )
         }
     }
 
     /**
      * Xử lý tự động khi hết giờ: Học xong thì chuyển sang Nghỉ, Nghỉ xong thì quay lại Học
      */
-    private fun handleTimerComplete() {
+    private fun handleTimerComplete(resetEvent: Boolean = false) {
         pauseTimer()
         val currentState = _uiState.value
 
@@ -89,7 +143,8 @@ class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
                 it.copy(
                     pomodorosToday = it.pomodorosToday + 1,
                     currentMode = PomodoroMode.SHORT_BREAK,
-                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds
+                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds,
+                    event = EventType.WORK_END
                 )
             }
         } else {
@@ -97,9 +152,49 @@ class PomodoroViewModel(private val viewModelScope: CoroutineScope) {
             _uiState.update {
                 it.copy(
                     currentMode = PomodoroMode.WORK,
-                    timeLeft = PomodoroMode.WORK.totalSeconds
+                    timeLeft = PomodoroMode.WORK.totalSeconds,
+                    event = EventType.BREAK_END
                 )
             }
+        }
+    }
+
+    private fun resumeTimerAfterRestore() {
+        timerJob?.cancel()
+
+        timerJob = viewModelScope.launch {
+            while (_uiState.value.timeLeft > 0 && _uiState.value.isActive) {
+                delay(1000)
+                _uiState.update { it.copy(timeLeft = it.timeLeft - 1) }
+            }
+
+            if (_uiState.value.timeLeft <= 0) {
+                handleTimerComplete()
+            }
+        }
+    }
+
+    private fun resolveStartEvent(state: PomodoroUiState): EventType {
+        return when (state.event) {
+            EventType.NOTHING,
+            EventType.CLICK_PAUSE_WORK -> EventType.CLICK_START_WORK
+            EventType.CLICK_PAUSE_BREAK -> EventType.CLICK_START_BREAK
+            EventType.CLICK_START_WORK,
+            EventType.BREAK_END,
+            EventType.WORK_END,
+            EventType.CLICK_START_BREAK -> state.event
+        }
+    }
+
+    private fun resolvePauseEvent(state: PomodoroUiState): EventType {
+        return when (state.event) {
+            EventType.CLICK_START_WORK -> EventType.CLICK_PAUSE_WORK
+            EventType.CLICK_START_BREAK -> EventType.CLICK_PAUSE_BREAK
+            EventType.NOTHING,
+            EventType.CLICK_PAUSE_WORK,
+            EventType.BREAK_END,
+            EventType.WORK_END,
+            EventType.CLICK_PAUSE_BREAK -> state.event
         }
     }
 }

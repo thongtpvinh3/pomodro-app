@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
@@ -14,44 +15,62 @@ import thong.kotlin.pomodoro.core.navigation.AuraScreen
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraTheme
 import thong.kotlin.pomodoro.features.onboarding.presentation.OnboardingScreen
 import thong.kotlin.pomodoro.features.startup.presentation.StartupScreen
-import thong.kotlin.pomodoro.features.timer.presentation.PomodoroScreen
+import thong.kotlin.pomodoro.features.timer.presentation.PomodoroScreenResponsive
+import thong.kotlin.pomodoro.features.timer.presentation.PomodoroUiState
+import thong.kotlin.pomodoro.features.timer.presentation.PomodoroUiStateSaver
 import thong.kotlin.pomodoro.features.timer.presentation.PomodoroViewModel
 
 @Composable
 @Preview
 fun App() {
+    val coroutineScope = rememberCoroutineScope()
+    var currentScreenName by rememberSaveable {
+        mutableStateOf("Splash")
+    }
+    var showStartupScreen by remember { mutableStateOf(false) }
+    var currentScreen by remember(currentScreenName) {
+        mutableStateOf(
+            when (currentScreenName) {
+                "Onboarding" -> AuraScreen.Onboarding
+                "MainApp" -> AuraScreen.MainApp
+                else -> AuraScreen.Splash
+            }
+        )
+    }
+    var savedPomodoroState by rememberSaveable(
+        stateSaver = PomodoroUiStateSaver
+    ) {
+        mutableStateOf(PomodoroUiState())
+    }
+    val pomodoroViewModel = remember {
+        PomodoroViewModel(
+            viewModelScope = coroutineScope,
+            initialState = savedPomodoroState
+        )
+    }
+    LaunchedEffect(Unit) {
+        pomodoroViewModel.uiState.collect {
+            savedPomodoroState = it
+        }
+    }
 
-    // Quản lý màn hình hiện tại của toàn app bằng cấu trúc mã Core điều hướng
-    var currentScreen by remember { mutableStateOf<AuraScreen>(AuraScreen.Splash) }
-    var showStartupScreen by remember { mutableStateOf(true) }
-
-    // Bọc toàn bộ trong chiếc áo khoác AuraTheme chung
     AuraTheme {
         AuraNavigator(currentScreen = currentScreen) { screen ->
             when (screen) {
                 is AuraScreen.Splash -> {
                     LaunchedEffect(Unit) {
                         delay(3000)
-                        currentScreen = AuraScreen.Onboarding
+                        currentScreenName = "Onboarding"
                     }
                     StartupScreen(onNavigateToHome = { showStartupScreen = false })
                 }
-
                 is AuraScreen.Onboarding -> {
                     OnboardingScreen(onFinish = {
-                        currentScreen = AuraScreen.MainApp
+                        currentScreenName = "MainApp"
                     })
                 }
-
                 is AuraScreen.MainApp -> {
-                    // Tạo một CoroutineScope gắn liền với vòng đời của Composable App
-                    val coroutineScope = rememberCoroutineScope()
-
-                    // Khởi tạo ViewModel và giữ trạng thái (remember) để không bị tạo lại khi recompose
-                    val viewModel = remember { PomodoroViewModel(coroutineScope) }
-
-                    // Gọi màn hình Pomodoro đã code ở bước trước vào đây
-                    PomodoroScreen(viewModel = viewModel)
+                    PomodoroScreenResponsive(viewModel = pomodoroViewModel)
                 }
             }
         }
