@@ -3,29 +3,23 @@ package thong.kotlin.pomodoro.features.pomodoro.music.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
-
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import thong.kotlin.pomodoro.core.designsystem.components.GlassBox
-import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
-import thong.kotlin.pomodoro.core.designsystem.theme.AuraGradients
 import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 
 @Composable
@@ -37,6 +31,9 @@ fun MusicSection(
     onSelectTrack: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val selectedTrack = availableTracks.find { it.id == selectedTrackId }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = "Âm nhạc tập trung",
@@ -74,19 +71,76 @@ fun MusicSection(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                // Track Selector
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(end = 8.dp)
-                ) {
-                    items(availableTracks) { track ->
-                        val isSelected = track.id == selectedTrackId
-                        MusicTrackItem(
-                            track = track,
-                            isSelected = isSelected,
-                        ) { onSelectTrack(track.id) }
+                // Selection Box (Dropdown)
+                Box(modifier = Modifier.weight(1f)) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .clickable { isExpanded = !isExpanded }
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        selectedTrack?.let { track ->
+                            Icon(
+                                imageVector = track.icon,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = track.name,
+                                color = Color.White,
+                                fontSize = 14.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        
+                        Icon(
+                            imageVector = Icons.Default.ArrowDropDown,
+                            contentDescription = "Expand",
+                            tint = Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+
+                    // Material3 DropdownMenu
+                    DropdownMenu(
+                        expanded = isExpanded,
+                        onDismissRequest = { isExpanded = false },
+                        modifier = Modifier
+                            .background(Color(0xFF1A1A1A)) // Dark background for dropdown
+                            .width(200.dp)
+                    ) {
+                        availableTracks.forEach { track ->
+                            DropdownMenuItem(
+                                text = {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = track.icon,
+                                            contentDescription = null,
+                                            tint = if (track.id == selectedTrackId) Color.Cyan else Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = track.name,
+                                            color = if (track.id == selectedTrackId) Color.Cyan else Color.White
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    onSelectTrack(track.id)
+                                    isExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -94,45 +148,3 @@ fun MusicSection(
     }
 }
 
-@Composable
-private fun MusicTrackItem(
-    track: MusicTrack,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundModifier = if (isSelected) {
-        Modifier.background(
-            Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.2f),
-                    Color.White.copy(alpha = 0.05f)
-                )
-            )
-        )
-    } else {
-        Modifier
-    }
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .then(backgroundModifier)
-            .clickable { onClick() }
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-    ) {
-        Icon(
-            imageVector = track.icon,
-            contentDescription = track.name,
-            tint = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = track.name,
-            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.6f),
-            fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-        )
-    }
-}

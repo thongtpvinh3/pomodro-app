@@ -9,18 +9,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material.icons.filled.WaterDrop
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.Task
-import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
+
+import thong.kotlin.pomodoro.features.pomodoro.music.data.MusicRepository
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
@@ -32,17 +28,11 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        // Khởi tạo danh sách nhạc mặc định
+        // Khởi tạo danh sách nhạc từ repository tập trung
         _uiState.update {
             it.copy(
-                availableTracks = listOf(
-                    MusicTrack("aura_audio", "Aura Focus", Icons.Default.MusicNote),
-                    MusicTrack("lofi_hiphop_audio", "Lofi Hiphop", Icons.Default.MusicNote),
-                    MusicTrack("rain", "Tiếng mưa", Icons.Default.WaterDrop),
-                    MusicTrack("forest", "Rừng đêm", Icons.Default.NightsStay),
-                    MusicTrack("white_noise", "Tiếng ồn trắng", Icons.Default.Air)
-                ),
-                selectedTrackId = "aura_audio"
+                availableTracks = MusicRepository.availableTracks,
+                selectedTrackId = MusicRepository.DEFAULT_TRACK_ID
             )
         }
 
