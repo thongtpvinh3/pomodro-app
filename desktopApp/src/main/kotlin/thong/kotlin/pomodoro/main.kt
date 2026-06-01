@@ -5,7 +5,7 @@ import androidx.compose.ui.window.application
 import thong.kotlin.pomodoro.core.media.JvmSoundManager
 
 fun main() = application {
-    val soundManager = JvmSoundManager()
+    val soundManager = JvmSoundManager.instance
     
     Window(
         onCloseRequest = ::exitApplication,

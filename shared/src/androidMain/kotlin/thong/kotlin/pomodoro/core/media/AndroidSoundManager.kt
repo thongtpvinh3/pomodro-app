@@ -3,9 +3,21 @@ package thong.kotlin.pomodoro.core.media
 import android.content.Context
 import android.media.MediaPlayer
 
-class AndroidSoundManager(private val context: Context) : SoundManager {
+class AndroidSoundManager private constructor(context: Context) : SoundManager {
+    private val context = context.applicationContext
     private var mediaPlayer: MediaPlayer? = null
     private var currentTrackId: String? = null
+
+    companion object {
+        @Volatile
+        private var instance: AndroidSoundManager? = null
+
+        fun getInstance(context: Context): AndroidSoundManager {
+            return instance ?: synchronized(this) {
+                instance ?: AndroidSoundManager(context).also { instance = it }
+            }
+        }
+    }
 
     override fun playAlarmSound() {
         // Triển khai sau nếu cần
@@ -76,6 +88,18 @@ class AndroidSoundManager(private val context: Context) : SoundManager {
         } catch (e: Exception) {
             android.util.Log.e("AndroidSoundManager", "Error playing effect: $fileName", e)
         }
+    }
+
+    override fun isBackgroundMusicPlaying(): Boolean {
+        return mediaPlayer?.isPlaying ?: false
+    }
+
+    override fun getCurrentTrackId(): String? {
+        return currentTrackId
+    }
+
+    override fun getCurrentPosition(): Long {
+        return mediaPlayer?.currentPosition?.toLong() ?: 0L
     }
 
     override fun stopAllSounds() {

@@ -29,10 +29,11 @@ class PomodoroViewModel(
 
     init {
         // Khởi tạo danh sách nhạc từ repository tập trung
-        _uiState.update {
-            it.copy(
+        _uiState.update { state ->
+            state.copy(
                 availableTracks = MusicRepository.availableTracks,
-                selectedTrackId = MusicRepository.DEFAULT_TRACK_ID
+                // Chỉ set mặc định nếu state được truyền vào chưa có bài nào được chọn
+                selectedTrackId = initialState.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID
             )
         }
 
@@ -232,26 +233,31 @@ class PomodoroViewModel(
     }
 
     fun toggleMusic() {
-        _uiState.update { 
-            val newIsPlaying = !it.isMusicPlaying
+        _uiState.update { state ->
+            val newIsPlaying = !state.isMusicPlaying
             if (newIsPlaying) {
-                it.selectedTrackId?.let { trackId ->
-                    // Sử dụng play để đảm bảo resume nếu track không đổi
+                state.selectedTrackId?.let { trackId ->
                     soundManager?.playBackgroundMusic(trackId)
                 }
             } else {
                 soundManager?.pauseBackgroundMusic()
             }
-            it.copy(isMusicPlaying = newIsPlaying) 
+            state.copy(
+                isMusicPlaying = newIsPlaying,
+                musicPosition = soundManager?.getCurrentPosition() ?: 0L
+            ) 
         }
     }
 
     fun selectTrack(trackId: String) {
-        _uiState.update { 
-            if (it.isMusicPlaying) {
+        _uiState.update { state ->
+            if (state.isMusicPlaying) {
                 soundManager?.playBackgroundMusic(trackId)
             }
-            it.copy(selectedTrackId = trackId) 
+            state.copy(
+                selectedTrackId = trackId,
+                musicPosition = 0L // Reset position when changing track
+            )
         }
     }
 

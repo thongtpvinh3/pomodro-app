@@ -17,7 +17,10 @@ val PomodoroUiStateSaver = listSaver(
             // Chuyển danh sách Task thành danh sách các thuộc tính đơn giản để có thể lưu trữ
             it.tasks.map { task ->
                 listOf(task.id, task.text, task.isCompleted)
-            }
+            },
+            it.selectedTrackId,
+            it.isMusicPlaying,
+            it.musicPosition
         )
     },
     restore = {
@@ -37,7 +40,10 @@ val PomodoroUiStateSaver = listSaver(
             pomodorosToday = it[3] as Int,
             event = EventType.valueOf(it[4] as String),
             newTaskText = it[5] as String,
-            tasks = restoredTasks
+            tasks = restoredTasks,
+            selectedTrackId = it[7] as String?,
+            isMusicPlaying = it[8] as Boolean,
+            musicPosition = it[9] as Long
         )
     }
 )

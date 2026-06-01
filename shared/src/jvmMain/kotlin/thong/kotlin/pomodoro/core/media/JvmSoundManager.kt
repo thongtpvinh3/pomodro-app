@@ -5,12 +5,16 @@ import java.io.BufferedInputStream
 import java.io.InputStream
 import kotlin.concurrent.thread
 
-class JvmSoundManager : SoundManager {
+class JvmSoundManager private constructor() : SoundManager {
     private var player: Player? = null
     private var currentTrackId: String? = null
     private var isPlaying = false
     private var totalBytesRead = 0L
     private var pausedPosition = 0L
+
+    companion object {
+        val instance: JvmSoundManager by lazy { JvmSoundManager() }
+    }
 
     override fun playAlarmSound() {}
     override fun playTickSound() {}
@@ -120,6 +124,18 @@ class JvmSoundManager : SoundManager {
                 e.printStackTrace()
             }
         }
+    }
+
+    override fun isBackgroundMusicPlaying(): Boolean {
+        return isPlaying
+    }
+
+    override fun getCurrentTrackId(): String? {
+        return currentTrackId
+    }
+
+    override fun getCurrentPosition(): Long {
+        return pausedPosition // In JvmSoundManager, we track position in pausedPosition variable
     }
 
     override fun stopAllSounds() {

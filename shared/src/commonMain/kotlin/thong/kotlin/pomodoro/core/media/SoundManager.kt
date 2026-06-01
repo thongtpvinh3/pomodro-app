@@ -40,6 +40,21 @@ interface SoundManager {
     fun playChimeSound()
 
     /**
+     * Kiểm tra xem nhạc nền có đang phát không
+     */
+    fun isBackgroundMusicPlaying(): Boolean
+
+    /**
+     * Lấy ID bài nhạc đang phát
+     */
+    fun getCurrentTrackId(): String?
+
+    /**
+     * Lấy vị trí hiện tại của bài nhạc (theo miliseconds hoặc bytes)
+     */
+    fun getCurrentPosition(): Long
+
+    /**
      * Dừng toàn bộ âm thanh đang phát
      */
     fun stopAllSounds()

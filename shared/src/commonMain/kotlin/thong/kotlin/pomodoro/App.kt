@@ -49,10 +49,11 @@ fun App(soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null) {
         )
     }
     LaunchedEffect(Unit) {
-        // Restore music if it was playing
-        if (savedPomodoroState.isMusicPlaying) {
+        // Only trigger playback if music is NOT already playing in the manager
+        // This prevents duplication on orientation changes
+        if (savedPomodoroState.isMusicPlaying && soundManager?.isBackgroundMusicPlaying() == false) {
             savedPomodoroState.selectedTrackId?.let { trackId ->
-                soundManager?.playBackgroundMusic(trackId)
+                soundManager.playBackgroundMusic(trackId)
             }
         }
 

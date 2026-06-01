@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        val soundManager = AndroidSoundManager(this)
+        val soundManager = AndroidSoundManager.getInstance(this)
         
         // Yêu cầu hệ thống cho phép ứng dụng vẽ tràn viền
         WindowCompat.setDecorFitsSystemWindows(window, false)

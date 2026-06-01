@@ -6,6 +6,8 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.Task
 import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 
+import thong.kotlin.pomodoro.features.settings.domain.AppBackground
+
 data class PomodoroUiState(
     val currentMode: PomodoroMode = PomodoroMode.WORK,
     val config: PomodoroConfig = PomodoroConfig(),
@@ -18,6 +20,9 @@ data class PomodoroUiState(
     val availableTracks: List<MusicTrack> = emptyList(),
     val selectedTrackId: String? = null,
     val isMusicPlaying: Boolean = false,
+    val musicPosition: Long = 0L,
+    val availableBackgrounds: List<AppBackground> = emptyList(),
+    val selectedBackgroundId: String? = null,
     val isTasksExpanded: Boolean = false
 ) {
     val isJustEndedBreak: Boolean
