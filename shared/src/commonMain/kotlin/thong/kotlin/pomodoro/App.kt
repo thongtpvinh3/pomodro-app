@@ -22,7 +22,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
 
 @Composable
 @Preview
-fun App() {
+fun App(soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null) {
     val coroutineScope = rememberCoroutineScope()
     var currentScreenName by rememberSaveable {
         mutableStateOf("Splash")
@@ -44,10 +44,18 @@ fun App() {
     val pomodoroViewModel = remember {
         PomodoroViewModel(
             viewModelScope = coroutineScope,
+            soundManager = soundManager,
             initialState = savedPomodoroState
         )
     }
     LaunchedEffect(Unit) {
+        // Restore music if it was playing
+        if (savedPomodoroState.isMusicPlaying) {
+            savedPomodoroState.selectedTrackId?.let { trackId ->
+                soundManager?.playBackgroundMusic(trackId)
+            }
+        }
+
         pomodoroViewModel.uiState.collect {
             savedPomodoroState = it
         }

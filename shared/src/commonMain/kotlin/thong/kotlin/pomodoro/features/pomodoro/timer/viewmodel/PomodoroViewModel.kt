@@ -24,6 +24,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
+    private val soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null,
     initialState: PomodoroUiState = PomodoroUiState()
 ) {
 
@@ -35,12 +36,13 @@ class PomodoroViewModel(
         _uiState.update {
             it.copy(
                 availableTracks = listOf(
-                    MusicTrack("lofi", "Lofi Hiphop", Icons.Default.MusicNote),
+                    MusicTrack("aura_audio", "Aura Focus", Icons.Default.MusicNote),
+                    MusicTrack("lofi_hiphop_audio", "Lofi Hiphop", Icons.Default.MusicNote),
                     MusicTrack("rain", "Tiếng mưa", Icons.Default.WaterDrop),
                     MusicTrack("forest", "Rừng đêm", Icons.Default.NightsStay),
                     MusicTrack("white_noise", "Tiếng ồn trắng", Icons.Default.Air)
                 ),
-                selectedTrackId = "lofi"
+                selectedTrackId = "aura_audio"
             )
         }
 
@@ -91,7 +93,16 @@ class PomodoroViewModel(
         timerJob = viewModelScope.launch {
             while (_uiState.value.timeLeft > 0) {
                 delay(1000) // Trì hoãn chính xác 1 giây
-                _uiState.update { it.copy(timeLeft = it.timeLeft - 1) }
+                _uiState.update { state ->
+                    val newTimeLeft = state.timeLeft - 1
+                    
+                    // Xử lý âm thanh thông báo giây cuối
+                    if (newTimeLeft in 1L..4L) {
+                        soundManager?.playBeepSound()
+                    }
+                    
+                    state.copy(timeLeft = newTimeLeft)
+                }
             }
             // Khi timeLeft về bằng 0, tự động chạy logic hoàn thành
             handleTimerComplete()
@@ -171,6 +182,7 @@ class PomodoroViewModel(
      * Xử lý tự động khi hết giờ: Học xong thì chuyển sang Nghỉ, Nghỉ xong thì quay lại Học
      */
     private fun handleTimerComplete(resetEvent: Boolean = false) {
+        soundManager?.playChimeSound()
         pauseTimer()
         val currentState = _uiState.value
 
@@ -230,11 +242,27 @@ class PomodoroViewModel(
     }
 
     fun toggleMusic() {
-        _uiState.update { it.copy(isMusicPlaying = !it.isMusicPlaying) }
+        _uiState.update { 
+            val newIsPlaying = !it.isMusicPlaying
+            if (newIsPlaying) {
+                it.selectedTrackId?.let { trackId ->
+                    // Sử dụng play để đảm bảo resume nếu track không đổi
+                    soundManager?.playBackgroundMusic(trackId)
+                }
+            } else {
+                soundManager?.pauseBackgroundMusic()
+            }
+            it.copy(isMusicPlaying = newIsPlaying) 
+        }
     }
 
     fun selectTrack(trackId: String) {
-        _uiState.update { it.copy(selectedTrackId = trackId) }
+        _uiState.update { 
+            if (it.isMusicPlaying) {
+                soundManager?.playBackgroundMusic(trackId)
+            }
+            it.copy(selectedTrackId = trackId) 
+        }
     }
 
     fun toggleTasksExpanded() {

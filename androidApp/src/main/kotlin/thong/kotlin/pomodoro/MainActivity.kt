@@ -10,11 +10,15 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
+import thong.kotlin.pomodoro.core.media.AndroidSoundManager
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        val soundManager = AndroidSoundManager(this)
+        
         // Yêu cầu hệ thống cho phép ứng dụng vẽ tràn viền
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -28,7 +32,7 @@ class MainActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            App()
+            App(soundManager = soundManager)
         }
     }
 }

@@ -49,6 +49,9 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.sqldelight.android)
         }
+        jvmMain.dependencies {
+            implementation(libs.jlayer)
+        }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)

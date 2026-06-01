@@ -16,8 +16,10 @@ kotlin-wrappers = "2026.5.3"
 kotlinx-coroutines = "1.11.0"
 material3 = "1.11.0-alpha07"
 sqldelight = "2.1.0"
+jlayer = "1.0.1"
 
 [libraries]
+jlayer = { module = "javazoom:jlayer", version.ref = "jlayer" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }
