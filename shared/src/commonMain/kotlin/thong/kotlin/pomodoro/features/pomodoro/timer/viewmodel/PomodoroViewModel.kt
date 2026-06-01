@@ -17,6 +17,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
 import thong.kotlin.pomodoro.features.pomodoro.music.data.MusicRepository
+import thong.kotlin.pomodoro.features.settings.data.BackgroundRepository
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
@@ -28,12 +29,14 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        // Khởi tạo danh sách nhạc từ repository tập trung
+        // Khởi tạo danh sách nhạc và hình nền từ repository tập trung
         _uiState.update { state ->
             state.copy(
                 availableTracks = MusicRepository.availableTracks,
                 // Chỉ set mặc định nếu state được truyền vào chưa có bài nào được chọn
-                selectedTrackId = initialState.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID
+                selectedTrackId = initialState.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID,
+                availableBackgrounds = BackgroundRepository.availableBackgrounds,
+                selectedBackgroundId = initialState.selectedBackgroundId ?: BackgroundRepository.DEFAULT_BACKGROUND_ID
             )
         }
 
@@ -259,6 +262,10 @@ class PomodoroViewModel(
                 musicPosition = 0L // Reset position when changing track
             )
         }
+    }
+
+    fun selectBackground(backgroundId: String) {
+        _uiState.update { it.copy(selectedBackgroundId = backgroundId) }
     }
 
     fun toggleTasksExpanded() {

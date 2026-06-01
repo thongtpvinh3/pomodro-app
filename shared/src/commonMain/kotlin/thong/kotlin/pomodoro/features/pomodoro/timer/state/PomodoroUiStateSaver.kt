@@ -20,7 +20,9 @@ val PomodoroUiStateSaver = listSaver(
             },
             it.selectedTrackId,
             it.isMusicPlaying,
-            it.musicPosition
+            it.musicPosition,
+            it.selectedBackgroundId,
+            it.isTasksExpanded
         )
     },
     restore = {
@@ -43,7 +45,9 @@ val PomodoroUiStateSaver = listSaver(
             tasks = restoredTasks,
             selectedTrackId = it[7] as String?,
             isMusicPlaying = it[8] as Boolean,
-            musicPosition = it[9] as Long
+            musicPosition = it[9] as Long,
+            selectedBackgroundId = it[10] as String?,
+            isTasksExpanded = it[11] as Boolean
         )
     }
 )

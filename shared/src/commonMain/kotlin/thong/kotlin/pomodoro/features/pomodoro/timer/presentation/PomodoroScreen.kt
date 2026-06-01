@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import pomodrokotlin.shared.generated.resources.Res
+import pomodrokotlin.shared.generated.resources.startup_bg
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
 import thong.kotlin.pomodoro.features.pomodoro.task.TaskSection
@@ -19,6 +21,7 @@ import thong.kotlin.pomodoro.features.pomodoro.task.TaskBottomBar
 import thong.kotlin.pomodoro.features.pomodoro.music.presentation.MusicSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
+import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.BackgroundSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.TimerSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
@@ -37,7 +40,14 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
         label = "ThemeColorTransition",
     )
 
-    AuraBackground(blurRadius = 3f, overlayAlpha = 0.4f) {
+    val currentBackground = uiState.availableBackgrounds.find { it.id == uiState.selectedBackgroundId }
+
+    AuraBackground(
+        imageRes = currentBackground?.resource ?: Res.drawable.startup_bg,
+        landscapeImageRes = currentBackground?.landscapeResource,
+        blurRadius = 3f,
+        overlayAlpha = 0.4f
+    ) {
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxSize()
@@ -57,7 +67,8 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                     onToggleTask = viewModel::toggleTask,
                     onNewTaskTextChange = viewModel::onNewTaskTextChange,
                     onToggleMusic = viewModel::toggleMusic,
-                    onSelectTrack = viewModel::selectTrack
+                    onSelectTrack = viewModel::selectTrack,
+                    onSelectBackground = viewModel::selectBackground
                 )
             } else {
                 PortraitPomodoroContent(
@@ -72,7 +83,8 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                     onNewTaskTextChange = viewModel::onNewTaskTextChange,
                     onToggleMusic = viewModel::toggleMusic,
                     onSelectTrack = viewModel::selectTrack,
-                    onToggleTasksExpanded = viewModel::toggleTasksExpanded
+                    onToggleTasksExpanded = viewModel::toggleTasksExpanded,
+                    onSelectBackground = viewModel::selectBackground
                 )
             }
         }
@@ -92,7 +104,8 @@ private fun PortraitPomodoroContent(
     onNewTaskTextChange: (String) -> Unit,
     onToggleMusic: () -> Unit,
     onSelectTrack: (String) -> Unit,
-    onToggleTasksExpanded: () -> Unit
+    onToggleTasksExpanded: () -> Unit,
+    onSelectBackground: (String) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -120,6 +133,17 @@ private fun PortraitPomodoroContent(
                 onSelectTrack = onSelectTrack,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            BackgroundSection(
+                availableBackgrounds = uiState.availableBackgrounds,
+                selectedBackgroundId = uiState.selectedBackgroundId,
+                onSelectBackground = onSelectBackground,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(100.dp)) // Extra space for bottom bar
         }
 
         TaskBottomBar(
@@ -148,7 +172,8 @@ private fun LandscapePomodoroContent(
     onToggleTask: (String) -> Unit,
     onNewTaskTextChange: (String) -> Unit,
     onToggleMusic: () -> Unit,
-    onSelectTrack: (String) -> Unit
+    onSelectTrack: (String) -> Unit,
+    onSelectBackground: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -184,6 +209,15 @@ private fun LandscapePomodoroContent(
                 isMusicPlaying = uiState.isMusicPlaying,
                 onToggleMusic = onToggleMusic,
                 onSelectTrack = onSelectTrack,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            BackgroundSection(
+                availableBackgrounds = uiState.availableBackgrounds,
+                selectedBackgroundId = uiState.selectedBackgroundId,
+                onSelectBackground = onSelectBackground,
                 modifier = Modifier.fillMaxWidth()
             )
 

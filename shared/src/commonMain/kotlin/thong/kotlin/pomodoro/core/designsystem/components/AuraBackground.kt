@@ -22,7 +22,7 @@ import pomodrokotlin.shared.generated.resources.startup_bg
 fun AuraBackground(
     modifier: Modifier = Modifier,
     imageRes: DrawableResource = Res.drawable.startup_bg,
-    landscapeImageRes: DrawableResource? = Res.drawable.landspace_startup_bg,
+    landscapeImageRes: DrawableResource? = null,
     blurRadius: Float = 2f,
     haveBackground: Boolean = true,
     backgroundColor: Color = Color.Black,
