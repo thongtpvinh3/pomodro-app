@@ -27,6 +27,7 @@ fun TaskSection(
     onToggleTask: (String) -> Unit,
     onNewTaskTextChange: (String) -> Unit,
     showBreakEndBanner: Boolean = false,
+    useLazyColumn: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
@@ -56,16 +57,31 @@ fun TaskSection(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(tasks, key = { it.id }) { task ->
-                TaskItem(
-                    task = task,
-                    onToggle = { onToggleTask(task.id) },
-                    onDelete = { onDeleteTask(task.id) }
-                )
+        if (useLazyColumn) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(tasks, key = { it.id }) { task ->
+                    TaskItem(
+                        task = task,
+                        onToggle = { onToggleTask(task.id) },
+                        onDelete = { onDeleteTask(task.id) }
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                tasks.forEach { task ->
+                    TaskItem(
+                        task = task,
+                        onToggle = { onToggleTask(task.id) },
+                        onDelete = { onDeleteTask(task.id) }
+                    )
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.Task
+import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 
 data class PomodoroUiState(
     val currentMode: PomodoroMode = PomodoroMode.WORK,
@@ -13,7 +14,11 @@ data class PomodoroUiState(
     val pomodorosToday: Int = 0,
     val event: EventType = EventType.NOTHING,
     val tasks: List<Task> = emptyList(),
-    val newTaskText: String = ""
+    val newTaskText: String = "",
+    val availableTracks: List<MusicTrack> = emptyList(),
+    val selectedTrackId: String? = null,
+    val isMusicPlaying: Boolean = false,
+    val isTasksExpanded: Boolean = false
 ) {
     val isJustEndedBreak: Boolean
         get() = currentMode == PomodoroMode.WORK &&

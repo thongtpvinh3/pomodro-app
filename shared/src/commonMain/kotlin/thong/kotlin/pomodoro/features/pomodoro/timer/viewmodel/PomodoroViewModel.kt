@@ -9,10 +9,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.random.Random
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.WaterDrop
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.Task
+import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
@@ -25,6 +31,19 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
+        // Khởi tạo danh sách nhạc mặc định
+        _uiState.update {
+            it.copy(
+                availableTracks = listOf(
+                    MusicTrack("lofi", "Lofi Hiphop", Icons.Default.MusicNote),
+                    MusicTrack("rain", "Tiếng mưa", Icons.Default.WaterDrop),
+                    MusicTrack("forest", "Rừng đêm", Icons.Default.NightsStay),
+                    MusicTrack("white_noise", "Tiếng ồn trắng", Icons.Default.Air)
+                ),
+                selectedTrackId = "lofi"
+            )
+        }
+
         if (initialState.isActive) {
             resumeTimerAfterRestore()
         }
@@ -208,6 +227,18 @@ class PomodoroViewModel(
                 }
             )
         }
+    }
+
+    fun toggleMusic() {
+        _uiState.update { it.copy(isMusicPlaying = !it.isMusicPlaying) }
+    }
+
+    fun selectTrack(trackId: String) {
+        _uiState.update { it.copy(selectedTrackId = trackId) }
+    }
+
+    fun toggleTasksExpanded() {
+        _uiState.update { it.copy(isTasksExpanded = !it.isTasksExpanded) }
     }
 
     private fun resumeTimerAfterRestore() {

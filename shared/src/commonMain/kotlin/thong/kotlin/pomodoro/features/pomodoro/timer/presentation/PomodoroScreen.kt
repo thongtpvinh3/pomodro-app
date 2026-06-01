@@ -2,15 +2,9 @@ package thong.kotlin.pomodoro.features.pomodoro.timer.presentation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -21,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
 import thong.kotlin.pomodoro.features.pomodoro.task.TaskSection
+import thong.kotlin.pomodoro.features.pomodoro.task.TaskBottomBar
+import thong.kotlin.pomodoro.features.pomodoro.music.presentation.MusicSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.TimerSection
@@ -38,7 +34,7 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
             PomodoroMode.LONG_BREAK -> AuraColors.LongBreakMode
         },
         animationSpec = tween(durationMillis = 500),
-        label = "ThemeColorTransition"
+        label = "ThemeColorTransition",
     )
 
     AuraBackground(blurRadius = 3f, overlayAlpha = 0.4f) {
@@ -59,7 +55,9 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                     onAddTask = viewModel::addTask,
                     onDeleteTask = viewModel::deleteTask,
                     onToggleTask = viewModel::toggleTask,
-                    onNewTaskTextChange = viewModel::onNewTaskTextChange
+                    onNewTaskTextChange = viewModel::onNewTaskTextChange,
+                    onToggleMusic = viewModel::toggleMusic,
+                    onSelectTrack = viewModel::selectTrack
                 )
             } else {
                 PortraitPomodoroContent(
@@ -71,7 +69,10 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                     onAddTask = viewModel::addTask,
                     onDeleteTask = viewModel::deleteTask,
                     onToggleTask = viewModel::toggleTask,
-                    onNewTaskTextChange = viewModel::onNewTaskTextChange
+                    onNewTaskTextChange = viewModel::onNewTaskTextChange,
+                    onToggleMusic = viewModel::toggleMusic,
+                    onSelectTrack = viewModel::selectTrack,
+                    onToggleTasksExpanded = viewModel::toggleTasksExpanded
                 )
             }
         }
@@ -88,31 +89,49 @@ private fun PortraitPomodoroContent(
     onAddTask: () -> Unit,
     onDeleteTask: (String) -> Unit,
     onToggleTask: (String) -> Unit,
-    onNewTaskTextChange: (String) -> Unit
+    onNewTaskTextChange: (String) -> Unit,
+    onToggleMusic: () -> Unit,
+    onSelectTrack: (String) -> Unit,
+    onToggleTasksExpanded: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        TimerSection(
-            uiState = uiState,
-            themeColor = themeColor,
-            onToggleTimer = onToggleTimer,
-            onResetTimer = onResetTimer,
-            onSkipTimer = onSkipTimer,
-            modifier = Modifier.fillMaxWidth()
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TimerSection(
+                uiState = uiState,
+                themeColor = themeColor,
+                onToggleTimer = onToggleTimer,
+                onResetTimer = onResetTimer,
+                onSkipTimer = onSkipTimer,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        TaskSection(
+            MusicSection(
+                availableTracks = uiState.availableTracks,
+                selectedTrackId = uiState.selectedTrackId,
+                isMusicPlaying = uiState.isMusicPlaying,
+                onToggleMusic = onToggleMusic,
+                onSelectTrack = onSelectTrack,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        TaskBottomBar(
             tasks = uiState.tasks,
+            isExpanded = uiState.isTasksExpanded,
+            onToggleExpand = onToggleTasksExpanded,
             newTaskText = uiState.newTaskText,
             onAddTask = onAddTask,
             onDeleteTask = onDeleteTask,
             onToggleTask = onToggleTask,
             onNewTaskTextChange = onNewTaskTextChange,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.align(Alignment.BottomCenter)
         )
     }
 }
@@ -127,34 +146,60 @@ private fun LandscapePomodoroContent(
     onAddTask: () -> Unit,
     onDeleteTask: (String) -> Unit,
     onToggleTask: (String) -> Unit,
-    onNewTaskTextChange: (String) -> Unit
+    onNewTaskTextChange: (String) -> Unit,
+    onToggleMusic: () -> Unit,
+    onSelectTrack: (String) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        TimerSection(
-            uiState = uiState,
-            themeColor = themeColor,
-            onToggleTimer = onToggleTimer,
-            onResetTimer = onResetTimer,
-            onSkipTimer = onSkipTimer,
-            compact = true,
-            modifier = Modifier.weight(1f)
-        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            TimerSection(
+                uiState = uiState,
+                themeColor = themeColor,
+                onToggleTimer = onToggleTimer,
+                onResetTimer = onResetTimer,
+                onSkipTimer = onSkipTimer,
+                compact = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
-        TaskSection(
-            tasks = uiState.tasks,
-            newTaskText = uiState.newTaskText,
-            onAddTask = onAddTask,
-            onDeleteTask = onDeleteTask,
-            onToggleTask = onToggleTask,
-            onNewTaskTextChange = onNewTaskTextChange,
-            showBreakEndBanner = uiState.event == EventType.BREAK_END,
-            modifier = Modifier.weight(1f)
-        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())
+        ) {
+            MusicSection(
+                availableTracks = uiState.availableTracks,
+                selectedTrackId = uiState.selectedTrackId,
+                isMusicPlaying = uiState.isMusicPlaying,
+                onToggleMusic = onToggleMusic,
+                onSelectTrack = onSelectTrack,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            TaskSection(
+                tasks = uiState.tasks,
+                newTaskText = uiState.newTaskText,
+                onAddTask = onAddTask,
+                onDeleteTask = onDeleteTask,
+                onToggleTask = onToggleTask,
+                onNewTaskTextChange = onNewTaskTextChange,
+                showBreakEndBanner = uiState.event == EventType.BREAK_END,
+                useLazyColumn = false,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
