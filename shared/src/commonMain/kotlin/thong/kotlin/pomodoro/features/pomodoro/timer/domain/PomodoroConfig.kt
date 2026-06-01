@@ -1,8 +1,8 @@
 package thong.kotlin.pomodoro.features.pomodoro.timer.domain
 
 data class PomodoroConfig(
-    val workMinutes: Int = 25,
-    val shortBreakMinutes: Int = 5,
+    val workMinutes: Int = 1,
+    val shortBreakMinutes: Int = 1,
     val longBreakMinutes: Int = 15
 ) {
     val workSeconds: Int get() = workMinutes * 60

@@ -30,7 +30,6 @@ fun TimerSection(
     modifier: Modifier = Modifier
 ) {
     val timerBackgroundColor = when (uiState.currentMode) {
-        PomodoroMode.STARTUP -> AuraColors.MainAppMode.copy(alpha = 0.2f)
         PomodoroMode.WORK -> AuraColors.WorkMode.copy(alpha = 0.15f)
         PomodoroMode.SHORT_BREAK -> AuraColors.ShortBreakMode.copy(alpha = 0.05f)
         PomodoroMode.LONG_BREAK -> AuraColors.LongBreakMode.copy(alpha = 0.05f)

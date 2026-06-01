@@ -33,7 +33,6 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
 
     val animatedThemeColor by animateColorAsState(
         targetValue = when (uiState.currentMode) {
-            PomodoroMode.STARTUP -> AuraColors.MainAppMode
             PomodoroMode.WORK -> AuraColors.WorkMode
             PomodoroMode.SHORT_BREAK -> AuraColors.ShortBreakMode
             PomodoroMode.LONG_BREAK -> AuraColors.LongBreakMode

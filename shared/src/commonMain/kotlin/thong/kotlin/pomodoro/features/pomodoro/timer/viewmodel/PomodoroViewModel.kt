@@ -25,18 +25,6 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        // Chỉ nạp mock tasks nếu danh sách task hiện tại đang trống (lần đầu mở app)
-        if (initialState.tasks.isEmpty()) {
-            _uiState.update {
-                it.copy(
-                    tasks = listOf(
-                        Task("1", "Hoàn thành UI lõi"),
-                        Task("2", "Đọc sách 15 phút")
-                    )
-                )
-            }
-        }
-
         if (initialState.isActive) {
             resumeTimerAfterRestore()
         }
@@ -128,7 +116,7 @@ class PomodoroViewModel(
                 it.copy(
                     isActive = false,
                     currentMode = PomodoroMode.SHORT_BREAK,
-                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds,
+                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds(it.config),
                     event = EventType.NOTHING
                 )
             }
@@ -138,7 +126,7 @@ class PomodoroViewModel(
                 it.copy(
                     isActive = false,
                     currentMode = PomodoroMode.WORK,
-                    timeLeft = PomodoroMode.WORK.totalSeconds,
+                    timeLeft = PomodoroMode.WORK.totalSeconds(it.config),
                     event = EventType.NOTHING
                 )
             }
@@ -154,7 +142,7 @@ class PomodoroViewModel(
             it.copy(
                 isActive = false,
                 currentMode = mode,
-                timeLeft = mode.totalSeconds,
+                timeLeft = mode.totalSeconds(it.config),
                 event = EventType.NOTHING
             )
         }
@@ -173,7 +161,7 @@ class PomodoroViewModel(
                 it.copy(
                     pomodorosToday = it.pomodorosToday + 1,
                     currentMode = PomodoroMode.SHORT_BREAK,
-                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds,
+                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds(it.config),
                     event = EventType.WORK_END
                 )
             }
@@ -182,7 +170,7 @@ class PomodoroViewModel(
             _uiState.update {
                 it.copy(
                     currentMode = PomodoroMode.WORK,
-                    timeLeft = PomodoroMode.WORK.totalSeconds,
+                    timeLeft = PomodoroMode.WORK.totalSeconds(it.config),
                     event = EventType.BREAK_END
                 )
             }
