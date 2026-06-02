@@ -26,6 +26,7 @@ fun TimerSection(
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
     onSkipTimer: () -> Unit,
+    onToggleSettings: () -> Unit,
     compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -46,7 +47,7 @@ fun TimerSection(
             title = "Aura Pomo",
             subtitle = "Tìm kiếm dòng chảy học tập",
             actionButton = {
-                IconButton(onClick = { /* Mở cài đặt */ }) {
+                IconButton(onClick = onToggleSettings) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Settings",

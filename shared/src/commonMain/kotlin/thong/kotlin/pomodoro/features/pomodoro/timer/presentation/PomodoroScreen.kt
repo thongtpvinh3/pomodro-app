@@ -23,6 +23,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.BackgroundSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.TimerSection
+import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.PomodoroSettingsModal
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
 
@@ -48,43 +49,59 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
         blurRadius = 3f,
         overlayAlpha = 0.4f
     ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp)
-        ) {
-            val isLandscape = maxWidth > maxHeight
+        Box(modifier = Modifier.fillMaxSize()) {
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp)
+            ) {
+                val isLandscape = maxWidth > maxHeight
 
-            if (isLandscape) {
-                LandscapePomodoroContent(
+                if (isLandscape) {
+                    LandscapePomodoroContent(
+                        uiState = uiState,
+                        themeColor = animatedThemeColor,
+                        onToggleTimer = viewModel::toggleTimer,
+                        onResetTimer = viewModel::resetTimer,
+                        onSkipTimer = viewModel::skipTimer,
+                        onToggleSettings = viewModel::toggleSettings,
+                        onAddTask = viewModel::addTask,
+                        onDeleteTask = viewModel::deleteTask,
+                        onToggleTask = viewModel::toggleTask,
+                        onNewTaskTextChange = viewModel::onNewTaskTextChange,
+                        onToggleMusic = viewModel::toggleMusic,
+                        onSelectTrack = viewModel::selectTrack,
+                        onSelectBackground = viewModel::selectBackground
+                    )
+                } else {
+                    PortraitPomodoroContent(
+                        uiState = uiState,
+                        themeColor = animatedThemeColor,
+                        onToggleTimer = viewModel::toggleTimer,
+                        onResetTimer = viewModel::resetTimer,
+                        onSkipTimer = viewModel::skipTimer,
+                        onToggleSettings = viewModel::toggleSettings,
+                        onAddTask = viewModel::addTask,
+                        onDeleteTask = viewModel::deleteTask,
+                        onToggleTask = viewModel::toggleTask,
+                        onNewTaskTextChange = viewModel::onNewTaskTextChange,
+                        onToggleMusic = viewModel::toggleMusic,
+                        onSelectTrack = viewModel::selectTrack,
+                        onToggleTasksExpanded = viewModel::toggleTasksExpanded,
+                        onSelectBackground = viewModel::selectBackground
+                    )
+                }
+            }
+
+            // Settings Modal
+            if (uiState.isSettingsVisible) {
+                PomodoroSettingsModal(
                     uiState = uiState,
-                    themeColor = animatedThemeColor,
-                    onToggleTimer = viewModel::toggleTimer,
-                    onResetTimer = viewModel::resetTimer,
-                    onSkipTimer = viewModel::skipTimer,
-                    onAddTask = viewModel::addTask,
-                    onDeleteTask = viewModel::deleteTask,
-                    onToggleTask = viewModel::toggleTask,
-                    onNewTaskTextChange = viewModel::onNewTaskTextChange,
-                    onToggleMusic = viewModel::toggleMusic,
-                    onSelectTrack = viewModel::selectTrack,
-                    onSelectBackground = viewModel::selectBackground
-                )
-            } else {
-                PortraitPomodoroContent(
-                    uiState = uiState,
-                    themeColor = animatedThemeColor,
-                    onToggleTimer = viewModel::toggleTimer,
-                    onResetTimer = viewModel::resetTimer,
-                    onSkipTimer = viewModel::skipTimer,
-                    onAddTask = viewModel::addTask,
-                    onDeleteTask = viewModel::deleteTask,
-                    onToggleTask = viewModel::toggleTask,
-                    onNewTaskTextChange = viewModel::onNewTaskTextChange,
-                    onToggleMusic = viewModel::toggleMusic,
-                    onSelectTrack = viewModel::selectTrack,
-                    onToggleTasksExpanded = viewModel::toggleTasksExpanded,
-                    onSelectBackground = viewModel::selectBackground
+                    onWorkChange = viewModel::onWorkMinutesChange,
+                    onBreakChange = viewModel::onBreakMinutesChange,
+                    onSave = viewModel::saveSettings,
+                    onCancel = viewModel::toggleSettings,
+                    onReset = viewModel::resetSettingsToDefault
                 )
             }
         }
@@ -98,6 +115,7 @@ private fun PortraitPomodoroContent(
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
     onSkipTimer: () -> Unit,
+    onToggleSettings: () -> Unit,
     onAddTask: () -> Unit,
     onDeleteTask: (String) -> Unit,
     onToggleTask: (String) -> Unit,
@@ -120,6 +138,7 @@ private fun PortraitPomodoroContent(
                 onToggleTimer = onToggleTimer,
                 onResetTimer = onResetTimer,
                 onSkipTimer = onSkipTimer,
+                onToggleSettings = onToggleSettings,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -167,6 +186,7 @@ private fun LandscapePomodoroContent(
     onToggleTimer: () -> Unit,
     onResetTimer: () -> Unit,
     onSkipTimer: () -> Unit,
+    onToggleSettings: () -> Unit,
     onAddTask: () -> Unit,
     onDeleteTask: (String) -> Unit,
     onToggleTask: (String) -> Unit,
@@ -193,6 +213,7 @@ private fun LandscapePomodoroContent(
                 onToggleTimer = onToggleTimer,
                 onResetTimer = onResetTimer,
                 onSkipTimer = onSkipTimer,
+                onToggleSettings = onToggleSettings,
                 compact = true,
                 modifier = Modifier.fillMaxWidth()
             )

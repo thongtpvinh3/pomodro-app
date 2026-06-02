@@ -272,6 +272,72 @@ class PomodoroViewModel(
         _uiState.update { it.copy(isTasksExpanded = !it.isTasksExpanded) }
     }
 
+    fun toggleSettings() {
+        _uiState.update { state ->
+            if (!state.isSettingsVisible) {
+                // Pre-fill editing values when opening
+                state.copy(
+                    isSettingsVisible = true,
+                    editingWorkMinutes = state.config.workMinutes.toString(),
+                    editingBreakMinutes = state.config.shortBreakMinutes.toString(),
+                    settingsError = null
+                )
+            } else {
+                state.copy(isSettingsVisible = false)
+            }
+        }
+    }
+
+    fun onWorkMinutesChange(value: String) {
+        _uiState.update { it.copy(editingWorkMinutes = value, settingsError = null) }
+    }
+
+    fun onBreakMinutesChange(value: String) {
+        _uiState.update { it.copy(editingBreakMinutes = value, settingsError = null) }
+    }
+
+    fun saveSettings() {
+        val workMin = _uiState.value.editingWorkMinutes.toIntOrNull()
+        val breakMin = _uiState.value.editingBreakMinutes.toIntOrNull()
+
+        if (workMin == null || breakMin == null) {
+            _uiState.update { it.copy(settingsError = "Vui lòng nhập số hợp lệ") }
+            return
+        }
+
+        if (workMin !in 1..120) {
+            _uiState.update { it.copy(settingsError = "Thời gian tập trung: 1 - 120 phút") }
+            return
+        }
+
+        if (breakMin !in 1..60) {
+            _uiState.update { it.copy(settingsError = "Thời gian nghỉ: 1 - 60 phút") }
+            return
+        }
+
+        val newConfig = _uiState.value.config.copy(
+            workMinutes = workMin,
+            shortBreakMinutes = breakMin
+        )
+
+        updateConfig(newConfig)
+        _uiState.update { it.copy(isSettingsVisible = false) }
+    }
+
+    fun resetSettingsToDefault() {
+        _uiState.update {
+            it.copy(
+                editingWorkMinutes = "25",
+                editingBreakMinutes = "5",
+                settingsError = null
+            )
+        }
+    }
+
+    fun updateBackgroundConfig(config: thong.kotlin.pomodoro.features.background.model.BackgroundConfig) {
+        _uiState.update { it.copy(backgroundConfig = config) }
+    }
+
     private fun resumeTimerAfterRestore() {
         timerJob?.cancel()
 
