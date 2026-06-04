@@ -39,7 +39,10 @@ data class PomodoroUiState(
     val isSettingsVisible: Boolean = false,
     val editingWorkMinutes: String = "",
     val editingBreakMinutes: String = "",
-    val settingsError: String? = null
+    val settingsError: String? = null,
+    val isCompactMode: Boolean = false,
+    val isCompactMenuExpanded: Boolean = false,
+    val activeCompactSection: CompactSection? = null
 ) {
     val incompleteTaskCount: Int
         get() = tasks.count { !it.isCompleted }
@@ -48,6 +51,10 @@ data class PomodoroUiState(
         get() = currentMode == PomodoroMode.WORK &&
                 timeLeft == currentMode.totalSeconds(config) &&
                 !isActive && event == EventType.BREAK_END
+}
+
+enum class CompactSection {
+    TASKS, MUSIC, BACKGROUND, AMBIENT, SETTINGS
 }
 
 fun PomodoroMode.totalSeconds(config: PomodoroConfig): Long {

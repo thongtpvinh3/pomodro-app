@@ -3,8 +3,10 @@ package thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -48,93 +50,113 @@ fun PomodoroSettingsModal(
             ),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Cấu hình Timer",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
+            SettingsContent(
+                uiState = uiState,
+                onWorkChange = onWorkChange,
+                onBreakChange = onBreakChange,
+                onSave = onSave,
+                onReset = onReset
+            )
+        }
+    }
+}
 
-                Spacer(modifier = Modifier.height(24.dp))
+@Composable
+fun SettingsContent(
+    uiState: PomodoroUiState,
+    onWorkChange: (String) -> Unit,
+    onBreakChange: (String) -> Unit,
+    onSave: () -> Unit,
+    onReset: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Cấu hình Timer",
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.White,
+            fontWeight = FontWeight.Bold
+        )
 
-                BoxWithConstraints {
-                    val isLandscape = maxWidth > 350.dp
-                    if (isLandscape) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            DurationInput(
-                                label = "Tập trung",
-                                value = uiState.editingWorkMinutes,
-                                onValueChange = onWorkChange,
-                                modifier = Modifier.weight(1f)
-                            )
-                            DurationInput(
-                                label = "Nghỉ ngơi",
-                                value = uiState.editingBreakMinutes,
-                                onValueChange = onBreakChange,
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-                    } else {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            DurationInput(
-                                label = "Tập trung",
-                                value = uiState.editingWorkMinutes,
-                                onValueChange = onWorkChange
-                            )
-                            DurationInput(
-                                label = "Nghỉ ngơi",
-                                value = uiState.editingBreakMinutes,
-                                onValueChange = onBreakChange
-                            )
-                        }
-                    }
-                }
+        Spacer(modifier = Modifier.height(24.dp))
 
-                if (uiState.settingsError != null) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = uiState.settingsError,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
+        // Input Fields Row/Column
+        BoxWithConstraints {
+            val isWide = maxWidth > 300.dp
+            if (isWide) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    TextButton(
-                        onClick = onReset,
+                    DurationInput(
+                        label = "Tập trung",
+                        value = uiState.editingWorkMinutes,
+                        onValueChange = onWorkChange,
                         modifier = Modifier.weight(1f)
-                    ) {
-                        Text("Mặc định", color = Color.White.copy(alpha = 0.6f))
-                    }
-
-                    Button(
-                        onClick = onSave,
-                        modifier = Modifier.weight(1f),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = AuraColors.WorkMode
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Text("Lưu", fontWeight = FontWeight.Bold)
-                    }
+                    )
+                    DurationInput(
+                        label = "Nghỉ ngơi",
+                        value = uiState.editingBreakMinutes,
+                        onValueChange = onBreakChange,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    DurationInput(
+                        label = "Tập trung",
+                        value = uiState.editingWorkMinutes,
+                        onValueChange = onWorkChange
+                    )
+                    DurationInput(
+                        label = "Nghỉ ngơi",
+                        value = uiState.editingBreakMinutes,
+                        onValueChange = onBreakChange
+                    )
+                }
+            }
+        }
+
+        if (uiState.settingsError != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = uiState.settingsError,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Action Buttons
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            TextButton(
+                onClick = onReset,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Mặc định", color = Color.White.copy(alpha = 0.6f))
+            }
+
+            Button(
+                onClick = onSave,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AuraColors.WorkMode
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Lưu", fontWeight = FontWeight.Bold)
             }
         }
     }

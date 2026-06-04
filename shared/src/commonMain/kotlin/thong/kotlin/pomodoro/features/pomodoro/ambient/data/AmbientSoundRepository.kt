@@ -11,10 +11,10 @@ import thong.kotlin.pomodoro.features.pomodoro.ambient.domain.AmbientSound
 
 object AmbientSoundRepository {
     val availableSounds: List<AmbientSound> = listOf(
-        AmbientSound("rain", "Tiếng mưa", Icons.Default.WaterDrop),
-        AmbientSound("storm", "Bão tố", Icons.Default.Thunderstorm),
-        AmbientSound("campfire", "Lửa trại", Icons.Default.Fireplace),
-        AmbientSound("library", "Thư viện", Icons.AutoMirrored.Filled.MenuBook),
-        AmbientSound("white_noise", "Tiếng ồn trắng", Icons.Default.Air)
+        AmbientSound("effect_rain", "Tiếng mưa", Icons.Default.WaterDrop),
+        AmbientSound("effect_storm", "Bão tố", Icons.Default.Thunderstorm),
+        AmbientSound("effect_campfire", "Lửa trại", Icons.Default.Fireplace),
+        AmbientSound("effect_library", "Thư viện", Icons.AutoMirrored.Filled.MenuBook),
+        AmbientSound("effect_white_noise", "Tiếng ồn trắng", Icons.Default.Air)
     )
 }
