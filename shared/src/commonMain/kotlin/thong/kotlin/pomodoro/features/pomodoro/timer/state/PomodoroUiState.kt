@@ -1,5 +1,6 @@
 package thong.kotlin.pomodoro.features.pomodoro.timer.state
 
+import androidx.compose.runtime.Immutable
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
@@ -11,6 +12,7 @@ import thong.kotlin.pomodoro.features.background.model.PerformanceMode
 
 import thong.kotlin.pomodoro.features.settings.domain.AppBackground
 
+@Immutable
 data class PomodoroUiState(
     val currentMode: PomodoroMode = PomodoroMode.WORK,
     val config: PomodoroConfig = PomodoroConfig(),

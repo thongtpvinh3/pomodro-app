@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,13 +31,15 @@ fun TimerSection(
     compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val timerBackgroundColor = when (uiState.currentMode) {
-        PomodoroMode.WORK -> AuraColors.WorkMode.copy(alpha = 0.15f)
-        PomodoroMode.SHORT_BREAK -> AuraColors.ShortBreakMode.copy(alpha = 0.05f)
-        PomodoroMode.LONG_BREAK -> AuraColors.LongBreakMode.copy(alpha = 0.05f)
+    val timerBackgroundColor = remember(uiState.currentMode) {
+        when (uiState.currentMode) {
+            PomodoroMode.WORK -> AuraColors.WorkMode.copy(alpha = 0.15f)
+            PomodoroMode.SHORT_BREAK -> AuraColors.ShortBreakMode.copy(alpha = 0.05f)
+            PomodoroMode.LONG_BREAK -> AuraColors.LongBreakMode.copy(alpha = 0.05f)
+        }
     }
 
-    val timerSizes = getTimerSizes(compact)
+    val timerSizes = remember(compact) { getTimerSizes(compact) }
 
     Column(
         modifier = modifier,

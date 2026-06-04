@@ -31,6 +31,7 @@ fun TaskItem(
 ) {
     GlassBox(
         shape = RoundedCornerShape(16.dp),
+        animateColor = false,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(

@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -20,13 +21,19 @@ fun AuraCircularProgress(
     progress: Float,                // Giá trị từ 0.0f đến 1.0f
     progressBrush: Brush,           // Dải màu gradient (ví dụ: AuraGradients.WorkFlow)
     modifier: Modifier = Modifier,
-    strokeWidth: Dp = 6.dp
+    strokeWidth: Dp = 6.dp,
+    animate: Boolean = true         // OPTIMIZATION: Toggle animation
 ) {
-    // Mượt hóa chuyển động của thanh tiến độ khi thời gian giảm dần
-    val animatedProgress = animateFloatAsState(
-        targetValue = progress,
-        animationSpec = tween(durationMillis = 1000)
-    )
+    // Mượt hóa chuyển động của thanh tiến độ
+    val finalProgress = if (animate) {
+        val animatedProgress by animateFloatAsState(
+            targetValue = progress,
+            animationSpec = tween(durationMillis = 1000)
+        )
+        animatedProgress
+    } else {
+        progress
+    }
 
     Box(
         modifier = modifier,
@@ -35,19 +42,19 @@ fun AuraCircularProgress(
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidthPx = strokeWidth.toPx()
 
-            // 1. Vẽ vòng tròn nền (Track) phía sau - màu trắng mờ ảo cực nhẹ
+            // 1. Vẽ vòng tròn nền (Track) phía sau
             drawCircle(
                 color = Color.White.copy(alpha = 0.05f),
                 style = Stroke(width = strokeWidthPx)
             )
 
-            // 2. Vẽ vòng tiến trình (Arc) chạy động phía trước
+            // 2. Vẽ vòng tiến trình (Arc)
             drawArc(
                 brush = progressBrush,
-                startAngle = -90f, // Bắt đầu chạy từ đỉnh 12 giờ
-                sweepAngle = 360f * animatedProgress.value, // Quay theo phần trăm tiến độ
+                startAngle = -90f,
+                sweepAngle = 360f * finalProgress,
                 useCenter = false,
-                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round) // Bo tròn 2 đầu thanh
+                style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
             )
         }
     }

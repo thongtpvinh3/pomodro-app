@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -17,20 +16,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 import thong.kotlin.pomodoro.core.designsystem.components.GlassBox
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
 
+/**
+ * A compact task entry point that looks like a circular button when collapsed 
+ * and a full task list when expanded. Positioned at bottom-right in landscape.
+ */
 @Composable
-fun TaskBottomBar(
+fun TaskSideBar(
     tasks: List<Task>,
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
-    // TaskSection props
     newTaskText: String,
     onAddTask: () -> Unit,
     onDeleteTask: (String) -> Unit,
@@ -38,54 +38,46 @@ fun TaskBottomBar(
     onNewTaskTextChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var currentTaskIndex by remember { mutableStateOf(0) }
-
-    // Cycle tasks when collapsed
-    LaunchedEffect(tasks.size, isExpanded) {
-        if (!isExpanded && tasks.isNotEmpty()) {
-            while (true) {
-                delay(4000) // 4 seconds per task
-                currentTaskIndex = (currentTaskIndex + 1) % tasks.size
-            }
-        }
-    }
-
-    // Reset index if it goes out of bounds (e.g. task deleted)
-    LaunchedEffect(tasks.size) {
-        if (currentTaskIndex >= tasks.size) {
-            currentTaskIndex = 0
-        }
-    }
-
     // Shared animation spec for synchronized motion
     val animationSpec = spring<Dp>(
         dampingRatio = Spring.DampingRatioLowBouncy,
         stiffness = Spring.StiffnessLow
     )
 
+    val animatedWidth by animateDpAsState(
+        targetValue = if (isExpanded) 350.dp else 64.dp,
+        animationSpec = animationSpec,
+        label = "TaskBarWidth"
+    )
+    
     val animatedHeight by animateDpAsState(
-        targetValue = if (isExpanded) 400.dp else 72.dp,
+        targetValue = if (isExpanded) 400.dp else 64.dp,
         animationSpec = animationSpec,
         label = "TaskBarHeight"
     )
 
+    val cornerRadius by animateDpAsState(
+        targetValue = if (isExpanded) 24.dp else 32.dp,
+        animationSpec = animationSpec,
+        label = "TaskBarCornerRadius"
+    )
+
     Box(
         modifier = modifier
-            .fillMaxWidth()
+            .width(animatedWidth)
             .height(animatedHeight)
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)
+            .padding(bottom = 16.dp, end = 16.dp)
             .graphicsLayer {
                 // Offload clipping and transformations to GPU
                 clip = true
-                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+                shape = RoundedCornerShape(cornerRadius)
             }
     ) {
         GlassBox(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable { onToggleExpand() },
-            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
+            shape = RoundedCornerShape(cornerRadius),
             backgroundColor = AuraColors.BottomBarBackground
         ) {
             AnimatedContent(
@@ -94,14 +86,14 @@ fun TaskBottomBar(
                     fadeIn(animationSpec = tween(300, easing = LinearOutSlowInEasing)) togetherWith
                     fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
                 },
-                label = "TaskBarContentTransition",
+                label = "TaskSideBarContentTransition",
                 modifier = Modifier.fillMaxSize()
             ) { expanded ->
                 if (expanded) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(20.dp)
+                            .padding(16.dp)
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -109,7 +101,7 @@ fun TaskBottomBar(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Danh sách công việc",
+                                text = "Công việc",
                                 color = Color.White,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
@@ -135,56 +127,15 @@ fun TaskBottomBar(
                         )
                     }
                 } else {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 24.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.List,
-                                contentDescription = "Tasks",
-                                tint = AuraColors.WorkMode,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            AnimatedContent(
-                                targetState = if (tasks.isEmpty()) null else tasks[currentTaskIndex],
-                                transitionSpec = {
-                                    (slideInVertically { it } + fadeIn()) togetherWith
-                                            (slideOutVertically { -it } + fadeOut())
-                                },
-                                label = "TaskCycling"
-                            ) { task ->
-                                if (task != null) {
-                                    Text(
-                                        text = task.text,
-                                        color = Color.White,
-                                        fontSize = 15.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                } else {
-                                    Text(
-                                        text = "Chưa có công việc nào",
-                                        color = Color.White.copy(alpha = 0.5f),
-                                        fontSize = 15.sp
-                                    )
-                                }
-                            }
-                        }
-
                         Icon(
-                            imageVector = Icons.Default.ExpandLess,
-                            contentDescription = "Expand",
-                            tint = Color.White.copy(alpha = 0.6f)
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "Tasks",
+                            tint = AuraColors.WorkMode,
+                            modifier = Modifier.size(28.dp)
                         )
                     }
                 }

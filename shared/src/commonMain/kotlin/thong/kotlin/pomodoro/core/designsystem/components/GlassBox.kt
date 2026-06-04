@@ -23,25 +23,28 @@ fun GlassBox(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(24.dp),
     backgroundColor: Color = Color.White.copy(alpha = 0.07f),
-    backgroundBrush: Brush? = null,                           // Hỗ trợ nền Gradient nếu cần
-    borderBrush: Brush = AuraGradients.GlassBorder,           // TÍCH HỢP: Viền kính mờ từ AuraGradients
+    animateColor: Boolean = true,                            // OPTIMIZATION: Toggle animation
+    backgroundBrush: Brush? = null,
+    borderBrush: Brush = AuraGradients.GlassBorder,
     contentAlignment: Alignment = Alignment.Center,
     content: @Composable BoxScope.() -> Unit
 ) {
+    // OPTIMIZATION: Only animate if explicitly requested
+    val finalBgColor = if (animateColor) {
+        val animatedBgColor by animateColorAsState(
+            targetValue = backgroundColor,
+            animationSpec = AuraAnimations.colorTween(),
+            label = "GlassBoxBackgroundAnimation"
+        )
+        animatedBgColor
+    } else {
+        backgroundColor
+    }
 
-    // TÍCH HỢP: AuraAnimations
-    // Tự động mượt hóa màu nền bằng thông số SmoothEasing (nhanh ở đầu, mượt ở cuối)
-    val animatedBgColor by animateColorAsState(
-        targetValue = backgroundColor,
-        animationSpec = AuraAnimations.colorTween(),
-        label = "GlassBoxBackgroundAnimation"
-    )
-
-    // Xử lý linh hoạt Modifier đổ nền (Ưu tiên Gradient nếu có, không có thì dùng màu đơn có hiệu ứng)
     val backgroundModifier = if (backgroundBrush != null) {
         Modifier.background(backgroundBrush)
     } else {
-        Modifier.background(animatedBgColor)
+        Modifier.background(finalBgColor)
     }
 
     Box(

@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -63,10 +64,13 @@ fun TaskSection(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(tasks, key = { it.id }) { task ->
+                    val onToggle = remember(task.id, onToggleTask) { { onToggleTask(task.id) } }
+                    val onDelete = remember(task.id, onDeleteTask) { { onDeleteTask(task.id) } }
+                    
                     TaskItem(
                         task = task,
-                        onToggle = { onToggleTask(task.id) },
-                        onDelete = { onDeleteTask(task.id) }
+                        onToggle = onToggle,
+                        onDelete = onDelete
                     )
                 }
             }
@@ -76,10 +80,13 @@ fun TaskSection(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 tasks.forEach { task ->
+                    val onToggle = remember(task.id, onToggleTask) { { onToggleTask(task.id) } }
+                    val onDelete = remember(task.id, onDeleteTask) { { onDeleteTask(task.id) } }
+
                     TaskItem(
                         task = task,
-                        onToggle = { onToggleTask(task.id) },
-                        onDelete = { onDeleteTask(task.id) }
+                        onToggle = onToggle,
+                        onDelete = onDelete
                     )
                 }
             }
