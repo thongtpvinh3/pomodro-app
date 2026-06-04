@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.pomodoro.task
+package thong.kotlin.pomodoro.features.pomodoro.task.domain.model
 
 import androidx.compose.runtime.Immutable
 

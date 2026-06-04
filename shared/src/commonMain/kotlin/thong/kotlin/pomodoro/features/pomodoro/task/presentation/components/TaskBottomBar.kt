@@ -1,4 +1,6 @@
-package thong.kotlin.pomodoro.features.pomodoro.task
+package thong.kotlin.pomodoro.features.pomodoro.task.presentation.components
+
+import thong.kotlin.pomodoro.features.pomodoro.task.domain.model.Task
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*

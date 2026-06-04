@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
-import thong.kotlin.pomodoro.features.pomodoro.task.Task
+import thong.kotlin.pomodoro.features.pomodoro.task.domain.model.Task
 import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
 import thong.kotlin.pomodoro.features.pomodoro.ambient.domain.AmbientSound
 import thong.kotlin.pomodoro.features.background.model.BackgroundConfig
