@@ -2,8 +2,10 @@ package thong.kotlin.pomodoro.features.pomodoro.task
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -66,78 +68,108 @@ fun TaskSideBar(
         modifier = modifier
             .width(animatedWidth)
             .height(animatedHeight)
-            .padding(bottom = 16.dp, end = 16.dp)
-            .graphicsLayer {
-                // Offload clipping and transformations to GPU
-                clip = true
-                shape = RoundedCornerShape(cornerRadius)
-            }
     ) {
-        GlassBox(
+        // 1. The main Sidebar Content (Clipped)
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { onToggleExpand() },
-            shape = RoundedCornerShape(cornerRadius),
-            backgroundColor = AuraColors.BottomBarBackground
+                .padding(bottom = 16.dp, end = 16.dp)
+                .graphicsLayer {
+                    // Offload clipping and transformations to GPU
+                    clip = true
+                    shape = RoundedCornerShape(cornerRadius)
+                }
         ) {
-            AnimatedContent(
-                targetState = isExpanded,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(300, easing = LinearOutSlowInEasing)) togetherWith
-                    fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
-                },
-                label = "TaskSideBarContentTransition",
-                modifier = Modifier.fillMaxSize()
-            ) { expanded ->
-                if (expanded) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+            GlassBox(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { onToggleExpand() },
+                shape = RoundedCornerShape(cornerRadius),
+                backgroundColor = AuraColors.BottomBarBackground
+            ) {
+                AnimatedContent(
+                    targetState = isExpanded,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(300, easing = LinearOutSlowInEasing)) togetherWith
+                        fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
+                    },
+                    label = "TaskSideBarContentTransition",
+                    modifier = Modifier.fillMaxSize()
+                ) { expanded ->
+                    if (expanded) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp)
                         ) {
-                            Text(
-                                text = "Công việc",
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ExpandMore,
-                                contentDescription = "Collapse",
-                                tint = Color.White
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Công việc",
+                                    color = Color.White,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = "Collapse",
+                                    tint = Color.White
+                                )
+                            }
+                            
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            TaskSection(
+                                tasks = tasks,
+                                newTaskText = newTaskText,
+                                onAddTask = onAddTask,
+                                onDeleteTask = onDeleteTask,
+                                onToggleTask = onToggleTask,
+                                onNewTaskTextChange = onNewTaskTextChange,
+                                useLazyColumn = true,
+                                modifier = Modifier.weight(1f)
                             )
                         }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        TaskSection(
-                            tasks = tasks,
-                            newTaskText = newTaskText,
-                            onAddTask = onAddTask,
-                            onDeleteTask = onDeleteTask,
-                            onToggleTask = onToggleTask,
-                            onNewTaskTextChange = onNewTaskTextChange,
-                            useLazyColumn = true,
-                            modifier = Modifier.weight(1f)
-                        )
+                    } else {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.List,
+                                contentDescription = "Tasks",
+                                tint = AuraColors.WorkMode,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
                     }
-                } else {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "Tasks",
-                            tint = AuraColors.WorkMode,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
+                }
+            }
+        }
+
+        // 2. The Floating Notification Badge (Overlay - Unclipped)
+        if (!isExpanded) {
+            val incompleteCount = tasks.count { !it.isCompleted }
+            if (incompleteCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        // Position relative to the top-right corner of the collapsed button (48x48)
+                        .offset(x = (animatedWidth - 34.dp), y = (-6).dp)
+                        .size(26.dp)
+                        .background(Color.Red, CircleShape)
+                        .clickable { onToggleExpand() }, // Also clickable
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (incompleteCount > 9) "9+" else incompleteCount.toString(),
+                        color = Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

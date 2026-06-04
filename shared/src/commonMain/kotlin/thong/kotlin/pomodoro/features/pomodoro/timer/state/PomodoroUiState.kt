@@ -6,6 +6,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.Task
 import thong.kotlin.pomodoro.features.pomodoro.music.domain.MusicTrack
+import thong.kotlin.pomodoro.features.pomodoro.ambient.domain.AmbientSound
 import thong.kotlin.pomodoro.features.background.model.BackgroundConfig
 import thong.kotlin.pomodoro.features.background.model.BackgroundType
 import thong.kotlin.pomodoro.features.background.model.PerformanceMode
@@ -26,6 +27,8 @@ data class PomodoroUiState(
     val selectedTrackId: String? = null,
     val isMusicPlaying: Boolean = false,
     val musicPosition: Long = 0L,
+    val availableAmbientSounds: List<AmbientSound> = emptyList(),
+    val activeAmbientSoundIds: Set<String> = emptySet(),
     val availableBackgrounds: List<AppBackground> = emptyList(),
     val selectedBackgroundId: String? = null,
     val isTasksExpanded: Boolean = false,
@@ -38,6 +41,9 @@ data class PomodoroUiState(
     val editingBreakMinutes: String = "",
     val settingsError: String? = null
 ) {
+    val incompleteTaskCount: Int
+        get() = tasks.count { !it.isCompleted }
+
     val isJustEndedBreak: Boolean
         get() = currentMode == PomodoroMode.WORK &&
                 timeLeft == currentMode.totalSeconds(config) &&

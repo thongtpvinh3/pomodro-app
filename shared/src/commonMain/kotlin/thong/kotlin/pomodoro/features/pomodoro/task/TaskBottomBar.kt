@@ -2,8 +2,10 @@ package thong.kotlin.pomodoro.features.pomodoro.task
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -146,12 +148,33 @@ fun TaskBottomBar(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.List,
-                                contentDescription = "Tasks",
-                                tint = AuraColors.WorkMode,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            Box {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.List,
+                                    contentDescription = "Tasks",
+                                    tint = AuraColors.WorkMode,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                
+                                val incompleteCount = tasks.count { !it.isCompleted }
+                                if (incompleteCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 10.dp, y = (-10).dp)
+                                            .size(20.dp)
+                                            .background(Color.Red, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = incompleteCount.toString(),
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
                             
                             Spacer(modifier = Modifier.width(16.dp))
 

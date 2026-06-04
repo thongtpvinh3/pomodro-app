@@ -11,6 +11,8 @@ class JvmSoundManager private constructor() : SoundManager {
     private var isPlaying = false
     private var totalBytesRead = 0L
     private var pausedPosition = 0L
+    private val ambientPlayers = mutableMapOf<String, Player>()
+    private val ambientThreads = mutableMapOf<String, Boolean>()
 
     companion object {
         val instance: JvmSoundManager by lazy { JvmSoundManager() }
@@ -141,6 +143,47 @@ class JvmSoundManager private constructor() : SoundManager {
     override fun stopAllSounds() {
         stopBackgroundMusic()
         pausedPosition = 0
+        ambientThreads.keys.forEach { id -> ambientThreads[id] = false }
+        ambientPlayers.values.forEach { it.close() }
+        ambientPlayers.clear()
+        ambientThreads.clear()
+    }
+
+    override fun playAmbientSound(soundId: String, volume: Float) {
+        if (ambientThreads[soundId] == true) return
+        
+        ambientThreads[soundId] = true
+        val resourcePath = "/composeResources/pomodrokotlin.shared.generated.resources/files/audio/$soundId.mp3"
+        
+        thread(start = true, isDaemon = true) {
+            while (ambientThreads[soundId] == true) {
+                try {
+                    val inputStream = JvmSoundManager::class.java.getResourceAsStream(resourcePath)
+                    if (inputStream != null) {
+                        val player = Player(BufferedInputStream(inputStream))
+                        ambientPlayers[soundId] = player
+                        player.play()
+                    } else {
+                        ambientThreads[soundId] = false
+                        break
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    ambientThreads[soundId] = false
+                    break
+                }
+            }
+        }
+    }
+
+    override fun stopAmbientSound(soundId: String) {
+        ambientThreads[soundId] = false
+        ambientPlayers[soundId]?.close()
+        ambientPlayers.remove(soundId)
+    }
+
+    override fun isAmbientSoundPlaying(soundId: String): Boolean {
+        return ambientThreads[soundId] == true
     }
 
     private fun stopBackgroundMusic() {

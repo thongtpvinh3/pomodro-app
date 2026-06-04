@@ -15,7 +15,7 @@ import thong.kotlin.pomodoro.core.navigation.AuraScreen
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraTheme
 import thong.kotlin.pomodoro.features.onboarding.presentation.OnboardingScreen
 import thong.kotlin.pomodoro.features.startup.presentation.StartupScreen
-import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.PomodoroScreenResponsive
+import thong.kotlin.pomodoro.features.pomodoro.PomodoroScreenResponsive
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiStateSaver
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel

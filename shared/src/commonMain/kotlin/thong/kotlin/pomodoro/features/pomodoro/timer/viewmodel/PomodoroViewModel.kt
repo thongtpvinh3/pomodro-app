@@ -17,6 +17,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
 import thong.kotlin.pomodoro.features.pomodoro.music.data.MusicRepository
+import thong.kotlin.pomodoro.features.pomodoro.ambient.data.AmbientSoundRepository
 import thong.kotlin.pomodoro.features.settings.data.BackgroundRepository
 
 class PomodoroViewModel(
@@ -35,6 +36,7 @@ class PomodoroViewModel(
                 availableTracks = MusicRepository.availableTracks,
                 // Chỉ set mặc định nếu state được truyền vào chưa có bài nào được chọn
                 selectedTrackId = initialState.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID,
+                availableAmbientSounds = AmbientSoundRepository.availableSounds,
                 availableBackgrounds = BackgroundRepository.availableBackgrounds,
                 selectedBackgroundId = initialState.selectedBackgroundId ?: BackgroundRepository.DEFAULT_BACKGROUND_ID
             )
@@ -261,6 +263,20 @@ class PomodoroViewModel(
                 selectedTrackId = trackId,
                 musicPosition = 0L // Reset position when changing track
             )
+        }
+    }
+
+    fun toggleAmbientSound(soundId: String) {
+        _uiState.update { state ->
+            val isCurrentlyActive = state.activeAmbientSoundIds.contains(soundId)
+            val newActiveIds = if (isCurrentlyActive) {
+                soundManager?.stopAmbientSound(soundId)
+                state.activeAmbientSoundIds - soundId
+            } else {
+                soundManager?.playAmbientSound(soundId)
+                state.activeAmbientSoundIds + soundId
+            }
+            state.copy(activeAmbientSoundIds = newActiveIds)
         }
     }
 

@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.pomodoro.timer.presentation
+package thong.kotlin.pomodoro.features.pomodoro
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -21,6 +21,7 @@ import thong.kotlin.pomodoro.features.pomodoro.task.TaskSideBar
 import thong.kotlin.pomodoro.features.pomodoro.music.presentation.MusicSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.BackgroundSection
+import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.AmbientSoundSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.TimerSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.PomodoroSettingsModal
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
@@ -70,6 +71,7 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                         onNewTaskTextChange = viewModel::onNewTaskTextChange,
                         onToggleMusic = viewModel::toggleMusic,
                         onSelectTrack = viewModel::selectTrack,
+                        onToggleAmbientSound = viewModel::toggleAmbientSound,
                         onToggleTasksExpanded = viewModel::toggleTasksExpanded,
                         onSelectBackground = viewModel::selectBackground
                     )
@@ -87,6 +89,7 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                         onNewTaskTextChange = viewModel::onNewTaskTextChange,
                         onToggleMusic = viewModel::toggleMusic,
                         onSelectTrack = viewModel::selectTrack,
+                        onToggleAmbientSound = viewModel::toggleAmbientSound,
                         onToggleTasksExpanded = viewModel::toggleTasksExpanded,
                         onSelectBackground = viewModel::selectBackground
                     )
@@ -122,6 +125,7 @@ private fun PortraitPomodoroContent(
     onNewTaskTextChange: (String) -> Unit,
     onToggleMusic: () -> Unit,
     onSelectTrack: (String) -> Unit,
+    onToggleAmbientSound: (String) -> Unit,
     onToggleTasksExpanded: () -> Unit,
     onSelectBackground: (String) -> Unit
 ) {
@@ -162,6 +166,15 @@ private fun PortraitPomodoroContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            AmbientSoundSection(
+                availableSounds = uiState.availableAmbientSounds,
+                activeSoundIds = uiState.activeAmbientSoundIds,
+                onToggleSound = onToggleAmbientSound,
+                modifier = Modifier.fillMaxWidth()
+            )
+
             Spacer(modifier = Modifier.height(100.dp)) // Extra space for bottom bar
         }
 
@@ -193,6 +206,7 @@ private fun LandscapePomodoroContent(
     onNewTaskTextChange: (String) -> Unit,
     onToggleMusic: () -> Unit,
     onSelectTrack: (String) -> Unit,
+    onToggleAmbientSound: (String) -> Unit,
     onToggleTasksExpanded: () -> Unit,
     onSelectBackground: (String) -> Unit
 ) {
@@ -241,6 +255,15 @@ private fun LandscapePomodoroContent(
                     availableBackgrounds = uiState.availableBackgrounds,
                     selectedBackgroundId = uiState.selectedBackgroundId,
                     onSelectBackground = onSelectBackground,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                AmbientSoundSection(
+                    availableSounds = uiState.availableAmbientSounds,
+                    activeSoundIds = uiState.activeAmbientSoundIds,
+                    onToggleSound = onToggleAmbientSound,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
