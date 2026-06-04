@@ -28,26 +28,29 @@ fun BackgroundSection(
     selectedBackgroundId: String?,
     onSelectBackground: (String) -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Hình nền ứng dụng",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        if (!compact) {
+            Text(
+                text = "Hình nền ứng dụng",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
 
         GlassBox(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(if (compact) 16.dp else 20.dp),
             backgroundColor = Color.White.copy(alpha = 0.05f)
         ) {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(if (compact) 8.dp else 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp),
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(availableBackgrounds) { background ->
@@ -55,7 +58,8 @@ fun BackgroundSection(
                     
                     BackgroundItem(
                         background = background,
-                        isSelected = isSelected
+                        isSelected = isSelected,
+                        compact = compact
                     ) { onSelectBackground(background.id) }
                 }
             }
@@ -67,15 +71,17 @@ fun BackgroundSection(
 private fun BackgroundItem(
     background: AppBackground,
     isSelected: Boolean,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
+    val size = if (compact) 50.dp else 60.dp
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(80.dp)
+        modifier = Modifier.width(if (compact) 70.dp else 80.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
+                .size(size)
                 .clip(RoundedCornerShape(12.dp))
                 .border(
                     width = 2.dp,

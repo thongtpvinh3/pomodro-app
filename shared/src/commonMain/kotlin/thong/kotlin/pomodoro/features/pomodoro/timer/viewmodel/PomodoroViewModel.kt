@@ -184,25 +184,26 @@ class PomodoroViewModel(
         pauseTimer()
         val currentState = _uiState.value
 
-        if (currentState.currentMode == PomodoroMode.WORK) {
+        val (newMode, nextTime, eventType, notification) = if (currentState.currentMode == PomodoroMode.WORK) {
             // Nếu vừa học xong: Tăng số Pomo trong ngày và chuyển sang Nghỉ ngắn
-            _uiState.update {
-                it.copy(
-                    pomodorosToday = it.pomodorosToday + 1,
-                    currentMode = PomodoroMode.SHORT_BREAK,
-                    timeLeft = PomodoroMode.SHORT_BREAK.totalSeconds(it.config),
-                    event = EventType.WORK_END
-                )
-            }
+            val nextMode = PomodoroMode.SHORT_BREAK
+            val nextTime = nextMode.totalSeconds(currentState.config)
+            listOf(nextMode, nextTime, EventType.WORK_END, "Work session completed. Time for a break!")
         } else {
             // Nếu vừa nghỉ xong: Quay trở lại chế độ Tập trung
-            _uiState.update {
-                it.copy(
-                    currentMode = PomodoroMode.WORK,
-                    timeLeft = PomodoroMode.WORK.totalSeconds(it.config),
-                    event = EventType.BREAK_END
-                )
-            }
+            val nextMode = PomodoroMode.WORK
+            val nextTime = nextMode.totalSeconds(currentState.config)
+            listOf(nextMode, nextTime, EventType.BREAK_END, "Break finished. Time to focus again!")
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                pomodorosToday = if (currentState.currentMode == PomodoroMode.WORK) state.pomodorosToday + 1 else state.pomodorosToday,
+                currentMode = newMode as PomodoroMode,
+                timeLeft = nextTime as Long,
+                event = eventType as EventType,
+                pendingNotification = notification as String
+            )
         }
     }
 
@@ -366,6 +367,14 @@ class PomodoroViewModel(
 
     fun setActiveCompactSection(section: CompactSection?) {
         _uiState.update { it.copy(activeCompactSection = section, isCompactMenuExpanded = false) }
+    }
+
+    fun toggleNotificationEnabled() {
+        _uiState.update { it.copy(isNotificationEnabled = !it.isNotificationEnabled) }
+    }
+
+    fun clearPendingNotification() {
+        _uiState.update { it.copy(pendingNotification = null) }
     }
 
     private fun resumeTimerAfterRestore() {

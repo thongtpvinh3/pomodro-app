@@ -36,17 +36,18 @@ import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
 fun TaskItem(
     task: Task,
     onToggle: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    compact: Boolean = false
 ) {
     GlassBox(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(if (compact) 12.dp else 16.dp),
         animateColor = false,
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = if (compact) 8.dp else 12.dp, vertical = if (compact) 6.dp else 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -57,10 +58,11 @@ fun TaskItem(
                 AuraCheckbox(
                     checked = task.isCompleted,
                     onCheckedChange = { onToggle() },
-                    activeColor = AuraColors.WorkMode
+                    activeColor = AuraColors.WorkMode,
+                    size = if (compact) 20.dp else 24.dp
                 )
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(if (compact) 8.dp else 12.dp))
 
                 val scrollState = rememberScrollState()
                 var containerWidth by remember { mutableStateOf(0) }
@@ -92,7 +94,7 @@ fun TaskItem(
                     Text(
                         text = task.text,
                         color = if (task.isCompleted) AuraColors.TextSecondary else Color.White,
-                        fontSize = 15.sp,
+                        fontSize = if (compact) 14.sp else 15.sp,
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                         maxLines = 1,
                         softWrap = false,
@@ -101,17 +103,17 @@ fun TaskItem(
                 }
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(if (compact) 4.dp else 8.dp))
 
             IconButton(
                 onClick = onDelete,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(if (compact) 28.dp else 32.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
                     tint = AuraColors.TextSecondary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(if (compact) 18.dp else 20.dp)
                 )
             }
         }

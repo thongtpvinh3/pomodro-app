@@ -43,7 +43,12 @@ val PomodoroUiStateSaver = listSaver<PomodoroUiState, Any>(
             it.isSettingsVisible,              // 21
             it.editingWorkMinutes,             // 22
             it.editingBreakMinutes,            // 23
-            it.settingsError ?: ""             // 24
+            it.settingsError ?: "",            // 24
+            it.isCompactMode,                  // 25
+            it.isCompactMenuExpanded,          // 26
+            it.activeCompactSection?.name ?: "", // 27
+            it.isNotificationEnabled,          // 28
+            it.activeAmbientSoundIds.toList()   // 29
         )
     },
     restore = {
@@ -56,6 +61,9 @@ val PomodoroUiStateSaver = listSaver<PomodoroUiState, Any>(
                 isCompleted = rawTask[2] as Boolean
             )
         }
+        
+        @Suppress("UNCHECKED_CAST")
+        val restoredAmbientIds = (it[29] as List<String>).toSet()
 
         PomodoroUiState(
             currentMode = PomodoroMode.valueOf(it[0] as String),
@@ -86,7 +94,14 @@ val PomodoroUiStateSaver = listSaver<PomodoroUiState, Any>(
             isSettingsVisible = it[21] as Boolean,
             editingWorkMinutes = it[22] as String,
             editingBreakMinutes = it[23] as String,
-            settingsError = (it[24] as String).takeIf { s -> s.isNotEmpty() }
+            settingsError = (it[24] as String).takeIf { s -> s.isNotEmpty() },
+            isCompactMode = it[25] as Boolean,
+            isCompactMenuExpanded = it[26] as Boolean,
+            activeCompactSection = (it[27] as String).takeIf { s -> s.isNotEmpty() }?.let { name ->
+                CompactSection.valueOf(name)
+            },
+            isNotificationEnabled = it[28] as Boolean,
+            activeAmbientSoundIds = restoredAmbientIds
         )
     }
 )

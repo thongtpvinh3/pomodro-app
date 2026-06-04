@@ -30,22 +30,25 @@ fun MusicSection(
     onToggleMusic: () -> Unit,
     onSelectTrack: (String) -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val selectedTrack = availableTracks.find { it.id == selectedTrackId }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Âm nhạc tập trung",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        if (!compact) {
+            Text(
+                text = "Âm nhạc tập trung",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
 
         GlassBox(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(if (compact) 16.dp else 20.dp),
             backgroundColor = Color.White.copy(alpha = 0.05f)
         ) {
             Row(

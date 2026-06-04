@@ -19,10 +19,14 @@ import thong.kotlin.pomodoro.features.pomodoro.presentation.PomodoroScreenRespon
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiStateSaver
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
+import thong.kotlin.pomodoro.core.notification.NotificationManager
 
 @Composable
 @Preview
-fun App(soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null) {
+fun App(
+    soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null,
+    notificationManager: NotificationManager? = null
+) {
     val coroutineScope = rememberCoroutineScope()
     var currentScreenName by rememberSaveable {
         mutableStateOf("Splash")
@@ -56,6 +60,13 @@ fun App(soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null) {
                 soundManager.playBackgroundMusic(trackId)
             }
         }
+        
+        // Resume Ambient Sounds
+        savedPomodoroState.activeAmbientSoundIds.forEach { soundId ->
+            if (soundManager?.isAmbientSoundPlaying(soundId) == false) {
+                soundManager.playAmbientSound(soundId)
+            }
+        }
 
         pomodoroViewModel.uiState.collect {
             savedPomodoroState = it
@@ -78,7 +89,10 @@ fun App(soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null) {
                     })
                 }
                 is AuraScreen.MainApp -> {
-                    PomodoroScreenResponsive(viewModel = pomodoroViewModel)
+                    PomodoroScreenResponsive(
+                        viewModel = pomodoroViewModel,
+                        notificationManager = notificationManager
+                    )
                 }
             }
         }

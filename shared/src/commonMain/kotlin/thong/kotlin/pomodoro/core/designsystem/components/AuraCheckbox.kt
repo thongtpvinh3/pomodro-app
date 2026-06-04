@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -25,7 +26,8 @@ fun AuraCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     activeColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    size: Dp = 24.dp
 ) {
     // Tự động mượt hóa màu nền từ trong suốt sang màu chủ đạo
     val backgroundColor by animateColorAsState(
@@ -44,7 +46,7 @@ fun AuraCheckbox(
 
     Box(
         modifier = modifier
-            .size(24.dp)
+            .size(size)
             .graphicsLayer(scaleX = scale, scaleY = scale)
             .clip(CircleShape)
             .background(backgroundColor)
@@ -57,7 +59,7 @@ fun AuraCheckbox(
                 imageVector = Icons.Default.Check,
                 contentDescription = "Checked",
                 tint = Color.Black, // Dấu tích đen nổi bật trên nền màu sáng
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(size * 0.65f)
             )
         }
     }

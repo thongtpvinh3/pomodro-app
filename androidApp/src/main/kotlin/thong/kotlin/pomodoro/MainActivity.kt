@@ -1,9 +1,14 @@
 package thong.kotlin.pomodoro
 
 import android.os.Bundle
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
@@ -11,13 +16,25 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 
 import thong.kotlin.pomodoro.core.media.AndroidSoundManager
+import thong.kotlin.pomodoro.core.notification.AndroidNotificationManager
 
 class MainActivity : ComponentActivity() {
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        // Quyền đã được cấp hoặc bị từ chối
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        // Yêu cầu quyền thông báo trên Android 13+
+        requestNotificationPermission()
+
         val soundManager = AndroidSoundManager.getInstance(this)
+        val notificationManager = AndroidNotificationManager(this)
         
         // Yêu cầu hệ thống cho phép ứng dụng vẽ tràn viền
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -32,7 +49,19 @@ class MainActivity : ComponentActivity() {
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
         setContent {
-            App(soundManager = soundManager)
+            App(
+                soundManager = soundManager,
+                notificationManager = notificationManager
+            )
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val permission = Manifest.permission.POST_NOTIFICATIONS
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissionLauncher.launch(permission)
+            }
         }
     }
 }

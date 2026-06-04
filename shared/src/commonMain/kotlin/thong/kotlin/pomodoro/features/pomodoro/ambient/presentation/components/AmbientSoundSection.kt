@@ -26,26 +26,29 @@ fun AmbientSoundSection(
     activeSoundIds: Set<String>,
     onToggleSound: (String) -> Unit,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = "Âm thanh môi trường",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 12.dp)
-        )
+        if (!compact) {
+            Text(
+                text = "Âm thanh môi trường",
+                color = Color.White,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
 
         GlassBox(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(if (compact) 16.dp else 20.dp),
             backgroundColor = Color.White.copy(alpha = 0.05f)
         ) {
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(if (compact) 8.dp else 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(if (compact) 8.dp else 12.dp),
                 contentPadding = PaddingValues(horizontal = 4.dp)
             ) {
                 items(availableSounds) { sound ->
@@ -53,7 +56,8 @@ fun AmbientSoundSection(
                     
                     AmbientSoundItem(
                         sound = sound,
-                        isActive = isActive
+                        isActive = isActive,
+                        compact = compact
                     ) { onToggleSound(sound.id) }
                 }
             }
@@ -65,15 +69,17 @@ fun AmbientSoundSection(
 private fun AmbientSoundItem(
     sound: AmbientSound,
     isActive: Boolean,
+    compact: Boolean = false,
     onClick: () -> Unit
 ) {
+    val size = if (compact) 50.dp else 60.dp
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(80.dp)
+        modifier = Modifier.width(if (compact) 70.dp else 80.dp)
     ) {
         Box(
             modifier = Modifier
-                .size(60.dp)
+                .size(size)
                 .clip(RoundedCornerShape(12.dp))
                 .background(if (isActive) Color.Cyan.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f))
                 .border(
@@ -88,7 +94,7 @@ private fun AmbientSoundItem(
                 imageVector = sound.icon,
                 contentDescription = sound.name,
                 tint = if (isActive) Color.Cyan else Color.White,
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(if (compact) 24.dp else 28.dp)
             )
         }
         

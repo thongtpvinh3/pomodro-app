@@ -5,13 +5,14 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import pomodrokotlin.shared.generated.resources.Res
 import pomodrokotlin.shared.generated.resources.startup_bg
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
@@ -30,10 +31,31 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.Pom
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.CompactSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
+import thong.kotlin.pomodoro.core.notification.NotificationManager
 
 @Composable
-fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
+fun PomodoroScreenResponsive(
+    viewModel: PomodoroViewModel,
+    notificationManager: NotificationManager? = null
+) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // --- Side Effect: Show Notifications ---
+    LaunchedEffect(uiState.pendingNotification) {
+        val message = uiState.pendingNotification
+        if (message != null && uiState.isNotificationEnabled) {
+            // Show system notification
+            notificationManager?.showNotification(
+                title = "Aura Pomo",
+                message = message
+            )
+            // Also show in-app snackbar as a fallback/visual confirmation
+            snackbarHostState.showSnackbar(message)
+
+            viewModel.clearPendingNotification()
+        }
+    }
 
     val animatedThemeColor by animateColorAsState(
         targetValue = when (uiState.currentMode) {
@@ -173,6 +195,14 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
                 }
             }
 
+            // In-app Snackbar Host
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 80.dp)
+            )
+
             // Settings Modal
             if (uiState.isSettingsVisible) {
                 PomodoroSettingsModal(
@@ -285,7 +315,14 @@ private fun LandscapeCompactContent(
             mode = uiState.currentMode,
             isActive = uiState.isActive,
             onToggle = onToggleTimer,
-            modifier = Modifier.align(Alignment.TopEnd)
+            width = 200.dp,
+            height = 80.dp,
+            timeFontSize = 28.sp,
+            buttonSize = 48.dp,
+            showExtraButtons = true,
+            onSettingsClick = { onSelectCompactSection(CompactSection.SETTINGS) },
+            onExitClick = onToggleCompactMode,
+            modifier = Modifier.align(Alignment.Center)
         )
 
         CompactMenu(
@@ -293,6 +330,7 @@ private fun LandscapeCompactContent(
             onToggleExpand = onToggleCompactMenu,
             onSelectSection = onSelectCompactSection,
             onExitCompactMode = onToggleCompactMode,
+            isLandscape = true,
             modifier = Modifier.align(Alignment.BottomEnd)
         )
 
