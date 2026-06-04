@@ -11,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import pomodrokotlin.shared.generated.resources.Res
+import pomodrokotlin.shared.generated.resources.landspace_startup_bg
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
 
 @Composable
@@ -18,6 +20,7 @@ fun StartupScreen() {
 
     // AuraBackground đã hỗ trợ tự động đổi ảnh Landscape/Portrait và ContentScale.Crop (Full Fill)
     AuraBackground(
+        landscapeImageRes = Res.drawable.landspace_startup_bg,
         blurRadius = 0f, 
         overlayAlpha = 0.2f
     ) {

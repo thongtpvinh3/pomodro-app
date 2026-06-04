@@ -9,6 +9,9 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,7 +30,15 @@ fun AuraInputField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier.onPreviewKeyEvent {
+            if (it.key == Key.Spacebar) {
+                // On Desktop, prevent the space key from bubbling up to parent containers 
+                // (like GlassBox with .clickable) which would trigger a toggle event.
+                true
+            } else {
+                false
+            }
+        },
         textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
         placeholder = {
             Text(text = placeholder, color = AuraColors.TextSecondary, fontSize = 15.sp)
