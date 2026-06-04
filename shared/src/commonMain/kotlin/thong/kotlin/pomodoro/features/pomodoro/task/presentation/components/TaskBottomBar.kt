@@ -77,7 +77,6 @@ fun TaskBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .height(animatedHeight)
-            .padding(horizontal = 16.dp)
             .padding(bottom = 16.dp)
             .graphicsLayer {
                 // Offload clipping and transformations to GPU

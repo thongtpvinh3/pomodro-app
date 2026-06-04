@@ -9,8 +9,8 @@ class JvmSoundManager private constructor() : SoundManager {
     private var player: Player? = null
     private var currentTrackId: String? = null
     private var isPlaying = false
-    private var totalBytesRead = 0L
     private var pausedPosition = 0L
+    private var trackingStream: TrackingInputStream? = null
     private val ambientPlayers = mutableMapOf<String, Player>()
     private val ambientThreads = mutableMapOf<String, Boolean>()
 
@@ -47,13 +47,18 @@ class JvmSoundManager private constructor() : SoundManager {
             while (isPlaying && currentTrackId == trackId) {
                 val inputStream = JvmSoundManager::class.java.getResourceAsStream(resourcePath)
                 if (inputStream != null) {
-                    val trackingStream = TrackingInputStream(inputStream)
-                    if (pausedPosition > 0) {
-                        trackingStream.skip(pausedPosition)
-                    }
-                    totalBytesRead = 0 // Reset for the new player instance
+                    val stream = TrackingInputStream(inputStream)
+                    trackingStream = stream
                     
-                    val bufferedStream = BufferedInputStream(trackingStream)
+                    if (pausedPosition > 0) {
+                        try {
+                            stream.skip(pausedPosition)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                    
+                    val bufferedStream = BufferedInputStream(stream)
                     player = Player(bufferedStream)
                     
                     try {
@@ -65,9 +70,10 @@ class JvmSoundManager private constructor() : SoundManager {
                     // If we reached the end normally, reset pausedPosition for loop
                     if (isPlaying && currentTrackId == trackId && player?.isComplete == true) {
                         pausedPosition = 0
+                    } else if (!isPlaying) {
+                        // If we stopped because of pause, capture current position
+                        pausedPosition = stream.bytesRead
                     }
-                    
-                    totalBytesRead = trackingStream.bytesRead
                 } else {
                     println("Resource not found: $resourcePath")
                     break
@@ -86,8 +92,10 @@ class JvmSoundManager private constructor() : SoundManager {
     override fun pauseBackgroundMusic() {
         if (isPlaying) {
             isPlaying = false
-            // The Player might have read more bytes than it actually played due to buffering,
-            // but this is a reasonable approximation for JLayer.
+            // Capture the position before closing the player
+            trackingStream?.let {
+                pausedPosition = it.bytesRead
+            }
             player?.close()
             player = null
         }

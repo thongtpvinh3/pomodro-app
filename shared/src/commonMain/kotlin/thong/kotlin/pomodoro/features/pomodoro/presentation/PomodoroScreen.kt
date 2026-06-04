@@ -53,7 +53,6 @@ fun PomodoroScreenResponsive(viewModel: PomodoroViewModel) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 20.dp)
             ) {
                 val isLandscape = maxWidth > maxHeight
 
@@ -133,7 +132,8 @@ private fun PortraitPomodoroContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TimerSection(
@@ -187,7 +187,10 @@ private fun PortraitPomodoroContent(
             onDeleteTask = onDeleteTask,
             onToggleTask = onToggleTask,
             onNewTaskTextChange = onNewTaskTextChange,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .align(Alignment.BottomCenter)
         )
     }
 }
@@ -214,7 +217,7 @@ private fun LandscapePomodoroContent(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 20.dp, bottom = 20.dp, start = 20.dp, end = 72.dp),
+                .padding(top = 20.dp, bottom = 20.dp, start = 40.dp, end = 92.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
