@@ -3,6 +3,7 @@ package thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ fun TimerSection(
     onResetTimer: () -> Unit,
     onSkipTimer: () -> Unit,
     onToggleSettings: () -> Unit,
+    onToggleCompactMode: () -> Unit = {},
     compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -50,12 +52,21 @@ fun TimerSection(
             title = "Aura Pomo",
             subtitle = "Tìm kiếm dòng chảy học tập",
             actionButton = {
-                IconButton(onClick = onToggleSettings) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = Color.White
-                    )
+                Row {
+                    IconButton(onClick = onToggleCompactMode) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Compact Mode",
+                            tint = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
+                    IconButton(onClick = onToggleSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         )

@@ -8,12 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import thong.kotlin.pomodoro.core.media.SoundManager
 import kotlin.random.Random
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.task.domain.model.Task
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
+import thong.kotlin.pomodoro.features.pomodoro.timer.state.CompactSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
 import thong.kotlin.pomodoro.features.pomodoro.music.data.MusicRepository
@@ -22,7 +24,7 @@ import thong.kotlin.pomodoro.features.settings.data.BackgroundRepository
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
-    private val soundManager: thong.kotlin.pomodoro.core.media.SoundManager? = null,
+    private val soundManager: SoundManager? = null,
     initialState: PomodoroUiState = PomodoroUiState()
 ) {
 
@@ -159,20 +161,20 @@ class PomodoroViewModel(
         }
     }
 
-    /**
-     * Người dùng tự chọn thủ công Chế độ học ở thanh chọn dưới đáy
-     */
-    fun switchMode(mode: PomodoroMode) {
-        timerJob?.cancel()
-        _uiState.update {
-            it.copy(
-                isActive = false,
-                currentMode = mode,
-                timeLeft = mode.totalSeconds(it.config),
-                event = EventType.NOTHING
-            )
-        }
-    }
+//    /**
+//     * Người dùng tự chọn thủ công Chế độ học ở thanh chọn dưới đáy
+//     */
+//    fun switchMode(mode: PomodoroMode) {
+//        timerJob?.cancel()
+//        _uiState.update {
+//            it.copy(
+//                isActive = false,
+//                currentMode = mode,
+//                timeLeft = mode.totalSeconds(it.config),
+//                event = EventType.NOTHING
+//            )
+//        }
+//    }
 
     /**
      * Xử lý tự động khi hết giờ: Học xong thì chuyển sang Nghỉ, Nghỉ xong thì quay lại Học
@@ -352,6 +354,18 @@ class PomodoroViewModel(
 
     fun updateBackgroundConfig(config: thong.kotlin.pomodoro.features.background.model.BackgroundConfig) {
         _uiState.update { it.copy(backgroundConfig = config) }
+    }
+
+    fun toggleCompactMode() {
+        _uiState.update { it.copy(isCompactMode = !it.isCompactMode, isCompactMenuExpanded = false) }
+    }
+
+    fun toggleCompactMenu() {
+        _uiState.update { it.copy(isCompactMenuExpanded = !it.isCompactMenuExpanded) }
+    }
+
+    fun setActiveCompactSection(section: CompactSection?) {
+        _uiState.update { it.copy(activeCompactSection = section, isCompactMenuExpanded = false) }
     }
 
     private fun resumeTimerAfterRestore() {
