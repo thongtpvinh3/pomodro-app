@@ -42,7 +42,9 @@ data class PomodoroUiState(
     val settingsError: String? = null,
     val isCompactMode: Boolean = false,
     val isCompactMenuExpanded: Boolean = false,
-    val activeCompactSection: CompactSection? = null
+    val activeCompactSection: CompactSection? = null,
+    val isNotificationEnabled: Boolean = true,
+    val pendingNotification: String? = null
 ) {
     val incompleteTaskCount: Int
         get() = tasks.count { !it.isCompleted }
