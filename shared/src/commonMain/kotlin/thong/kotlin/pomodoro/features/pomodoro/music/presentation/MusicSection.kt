@@ -147,4 +147,3 @@ fun MusicSection(
         }
     }
 }
-

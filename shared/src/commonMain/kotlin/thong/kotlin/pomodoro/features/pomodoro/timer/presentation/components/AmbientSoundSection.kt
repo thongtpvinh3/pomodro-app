@@ -1,0 +1,107 @@
+package thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import thong.kotlin.pomodoro.core.designsystem.components.GlassBox
+import thong.kotlin.pomodoro.features.pomodoro.ambient.domain.AmbientSound
+
+@Composable
+fun AmbientSoundSection(
+    availableSounds: List<AmbientSound>,
+    activeSoundIds: Set<String>,
+    onToggleSound: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = "Âm thanh môi trường",
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        GlassBox(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            backgroundColor = Color.White.copy(alpha = 0.05f)
+        ) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(availableSounds) { sound ->
+                    val isActive = activeSoundIds.contains(sound.id)
+                    
+                    AmbientSoundItem(
+                        sound = sound,
+                        isActive = isActive
+                    ) { onToggleSound(sound.id) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AmbientSoundItem(
+    sound: AmbientSound,
+    isActive: Boolean,
+    onClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(60.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(if (isActive) Color.Cyan.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f))
+                .border(
+                    width = 2.dp,
+                    color = if (isActive) Color.Cyan else Color.Transparent,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = sound.icon,
+                contentDescription = sound.name,
+                tint = if (isActive) Color.Cyan else Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(6.dp))
+        
+        Text(
+            text = sound.name,
+            color = if (isActive) Color.Cyan else Color.White.copy(alpha = 0.7f),
+            fontSize = 11.sp,
+            fontWeight = if (isActive) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}

@@ -1,9 +1,11 @@
 package thong.kotlin.pomodoro.features.pomodoro.task
 
 import androidx.compose.animation.*
-import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -15,8 +17,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -55,8 +59,15 @@ fun TaskBottomBar(
         }
     }
 
+    // Shared animation spec for synchronized motion
+    val animationSpec = spring<Dp>(
+        dampingRatio = Spring.DampingRatioLowBouncy,
+        stiffness = Spring.StiffnessLow
+    )
+
     val animatedHeight by animateDpAsState(
         targetValue = if (isExpanded) 400.dp else 72.dp,
+        animationSpec = animationSpec,
         label = "TaskBarHeight"
     )
 
@@ -64,7 +75,13 @@ fun TaskBottomBar(
         modifier = modifier
             .fillMaxWidth()
             .height(animatedHeight)
+            .padding(horizontal = 16.dp)
             .padding(bottom = 16.dp)
+            .graphicsLayer {
+                // Offload clipping and transformations to GPU
+                clip = true
+                shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp)
+            }
     ) {
         GlassBox(
             modifier = Modifier
@@ -73,95 +90,126 @@ fun TaskBottomBar(
             shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 24.dp, bottomEnd = 24.dp),
             backgroundColor = AuraColors.BottomBarBackground
         ) {
-            if (isExpanded) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+            AnimatedContent(
+                targetState = isExpanded,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(300, easing = LinearOutSlowInEasing)) togetherWith
+                    fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
+                },
+                label = "TaskBarContentTransition",
+                modifier = Modifier.fillMaxSize()
+            ) { expanded ->
+                if (expanded) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(20.dp)
                     ) {
-                        Text(
-                            text = "Danh sách công việc",
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(
-                            imageVector = Icons.Default.ExpandMore,
-                            contentDescription = "Collapse",
-                            tint = Color.White
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Danh sách công việc",
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ExpandMore,
+                                contentDescription = "Collapse",
+                                tint = Color.White
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        TaskSection(
+                            tasks = tasks,
+                            newTaskText = newTaskText,
+                            onAddTask = onAddTask,
+                            onDeleteTask = onDeleteTask,
+                            onToggleTask = onToggleTask,
+                            onNewTaskTextChange = onNewTaskTextChange,
+                            useLazyColumn = true,
+                            modifier = Modifier.weight(1f)
                         )
                     }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    TaskSection(
-                        tasks = tasks,
-                        newTaskText = newTaskText,
-                        onAddTask = onAddTask,
-                        onDeleteTask = onDeleteTask,
-                        onToggleTask = onToggleTask,
-                        onNewTaskTextChange = onNewTaskTextChange,
-                        useLazyColumn = true, // We want full list scrolling here
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 24.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+                } else {
                     Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 24.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.weight(1f)
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "Tasks",
-                            tint = AuraColors.WorkMode,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.List,
+                                    contentDescription = "Tasks",
+                                    tint = AuraColors.WorkMode,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                
+                                val incompleteCount = tasks.count { !it.isCompleted }
+                                if (incompleteCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 10.dp, y = (-10).dp)
+                                            .size(20.dp)
+                                            .background(Color.Red, CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = incompleteCount.toString(),
+                                            color = Color.White,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            Spacer(modifier = Modifier.width(16.dp))
 
-                        AnimatedContent(
-                            targetState = if (tasks.isEmpty()) null else tasks[currentTaskIndex],
-                            transitionSpec = {
-                                (slideInVertically { it } + fadeIn()) togetherWith
-                                        (slideOutVertically { -it } + fadeOut())
-                            },
-                            label = "TaskCycling"
-                        ) { task ->
-                            if (task != null) {
-                                Text(
-                                    text = task.text,
-                                    color = Color.White,
-                                    fontSize = 15.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            } else {
-                                Text(
-                                    text = "Chưa có công việc nào",
-                                    color = Color.White.copy(alpha = 0.5f),
-                                    fontSize = 15.sp
-                                )
+                            AnimatedContent(
+                                targetState = if (tasks.isEmpty()) null else tasks[currentTaskIndex],
+                                transitionSpec = {
+                                    (slideInVertically { it } + fadeIn()) togetherWith
+                                            (slideOutVertically { -it } + fadeOut())
+                                },
+                                label = "TaskCycling"
+                            ) { task ->
+                                if (task != null) {
+                                    Text(
+                                        text = task.text,
+                                        color = Color.White,
+                                        fontSize = 15.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                } else {
+                                    Text(
+                                        text = "Chưa có công việc nào",
+                                        color = Color.White.copy(alpha = 0.5f),
+                                        fontSize = 15.sp
+                                    )
+                                }
                             }
                         }
-                    }
 
-                    Icon(
-                        imageVector = Icons.Default.ExpandLess,
-                        contentDescription = "Expand",
-                        tint = Color.White.copy(alpha = 0.6f)
-                    )
+                        Icon(
+                            imageVector = Icons.Default.ExpandLess,
+                            contentDescription = "Expand",
+                            tint = Color.White.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
         }

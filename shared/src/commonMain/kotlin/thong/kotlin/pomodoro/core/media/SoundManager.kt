@@ -58,4 +58,19 @@ interface SoundManager {
      * Dừng toàn bộ âm thanh đang phát
      */
     fun stopAllSounds()
+
+    /**
+     * Phát âm thanh môi trường (looping)
+     */
+    fun playAmbientSound(soundId: String, volume: Float = 0.5f)
+
+    /**
+     * Dừng âm thanh môi trường
+     */
+    fun stopAmbientSound(soundId: String)
+
+    /**
+     * Kiểm tra xem âm thanh môi trường có đang phát không
+     */
+    fun isAmbientSoundPlaying(soundId: String): Boolean
 }

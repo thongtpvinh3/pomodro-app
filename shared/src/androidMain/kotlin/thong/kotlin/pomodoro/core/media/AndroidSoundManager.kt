@@ -7,6 +7,7 @@ class AndroidSoundManager private constructor(context: Context) : SoundManager {
     private val context = context.applicationContext
     private var mediaPlayer: MediaPlayer? = null
     private var currentTrackId: String? = null
+    private val ambientPlayers = mutableMapOf<String, MediaPlayer>()
 
     companion object {
         @Volatile
@@ -104,6 +105,52 @@ class AndroidSoundManager private constructor(context: Context) : SoundManager {
 
     override fun stopAllSounds() {
         stopBackgroundMusic()
+        ambientPlayers.forEach { (_, player) ->
+            try {
+                if (player.isPlaying) player.stop()
+                player.release()
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+        ambientPlayers.clear()
+    }
+
+    override fun playAmbientSound(soundId: String, volume: Float) {
+        if (ambientPlayers.containsKey(soundId)) return
+
+        try {
+            val assetPath = "composeResources/pomodrokotlin.shared.generated.resources/files/audio/$soundId.mp3"
+            val assetDescriptor = context.assets.openFd(assetPath)
+            
+            val player = MediaPlayer().apply {
+                setDataSource(assetDescriptor.fileDescriptor, assetDescriptor.startOffset, assetDescriptor.length)
+                assetDescriptor.close()
+                prepare()
+                setVolume(volume, volume)
+                isLooping = true
+                start()
+            }
+            ambientPlayers[soundId] = player
+        } catch (e: Exception) {
+            android.util.Log.e("AndroidSoundManager", "Error playing ambient sound: $soundId", e)
+        }
+    }
+
+    override fun stopAmbientSound(soundId: String) {
+        ambientPlayers[soundId]?.let {
+            try {
+                if (it.isPlaying) it.stop()
+                it.release()
+            } catch (e: Exception) {
+                // Ignore
+            }
+            ambientPlayers.remove(soundId)
+        }
+    }
+
+    override fun isAmbientSoundPlaying(soundId: String): Boolean {
+        return ambientPlayers[soundId]?.isPlaying ?: false
     }
 
     private fun stopBackgroundMusic() {
