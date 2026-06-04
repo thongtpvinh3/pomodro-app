@@ -1,4 +1,4 @@
-package thong.kotlin.pomodoro.features.pomodoro
+package thong.kotlin.pomodoro.features.pomodoro.presentation
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -16,12 +16,12 @@ import pomodrokotlin.shared.generated.resources.Res
 import pomodrokotlin.shared.generated.resources.startup_bg
 import thong.kotlin.pomodoro.core.designsystem.components.AuraBackground
 import thong.kotlin.pomodoro.core.designsystem.theme.AuraColors
-import thong.kotlin.pomodoro.features.pomodoro.task.TaskBottomBar
-import thong.kotlin.pomodoro.features.pomodoro.task.TaskSideBar
+import thong.kotlin.pomodoro.features.pomodoro.task.presentation.components.TaskBottomBar
+import thong.kotlin.pomodoro.features.pomodoro.task.presentation.components.TaskSideBar
 import thong.kotlin.pomodoro.features.pomodoro.music.presentation.MusicSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.BackgroundSection
-import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.AmbientSoundSection
+import thong.kotlin.pomodoro.features.pomodoro.ambient.presentation.components.AmbientSoundSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.TimerSection
 import thong.kotlin.pomodoro.features.pomodoro.timer.presentation.components.PomodoroSettingsModal
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState

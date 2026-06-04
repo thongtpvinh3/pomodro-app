@@ -12,7 +12,7 @@ import kotlin.random.Random
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.EventType
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroConfig
 import thong.kotlin.pomodoro.features.pomodoro.timer.domain.PomodoroMode
-import thong.kotlin.pomodoro.features.pomodoro.task.Task
+import thong.kotlin.pomodoro.features.pomodoro.task.domain.model.Task
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 
