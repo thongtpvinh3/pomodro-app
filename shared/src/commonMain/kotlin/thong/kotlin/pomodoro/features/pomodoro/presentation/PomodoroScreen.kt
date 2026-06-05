@@ -319,8 +319,7 @@ private fun LandscapeCompactContent(
             height = 80.dp,
             timeFontSize = 28.sp,
             buttonSize = 48.dp,
-            showExtraButtons = true,
-            onSettingsClick = { onSelectCompactSection(CompactSection.SETTINGS) },
+            showExitShortcut = true,
             onExitClick = onToggleCompactMode,
             modifier = Modifier.align(Alignment.Center)
         )
