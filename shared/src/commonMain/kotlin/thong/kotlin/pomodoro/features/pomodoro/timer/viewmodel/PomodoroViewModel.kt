@@ -21,10 +21,16 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.state.totalSeconds
 import thong.kotlin.pomodoro.features.pomodoro.music.data.MusicRepository
 import thong.kotlin.pomodoro.features.pomodoro.ambient.data.AmbientSoundRepository
 import thong.kotlin.pomodoro.features.settings.data.BackgroundRepository
+import thong.kotlin.pomodoro.features.pomodoro.domain.repository.UserAppStateRepository
+import thong.kotlin.pomodoro.features.pomodoro.domain.model.UserSettings
+import thong.kotlin.pomodoro.features.pomodoro.domain.model.SessionRecord
+import thong.kotlin.pomodoro.core.utils.getCurrentDateString
+import thong.kotlin.pomodoro.core.utils.getCurrentDateTimeString
 
 class PomodoroViewModel(
     private val viewModelScope: CoroutineScope,
     private val soundManager: SoundManager? = null,
+    private val repository: UserAppStateRepository? = null,
     initialState: PomodoroUiState = PomodoroUiState()
 ) {
 
@@ -32,20 +38,47 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        // Khởi tạo danh sách nhạc và hình nền từ repository tập trung
+        loadSavedState()
+    }
+
+    private fun loadSavedState() {
+        val savedSettings = repository?.getUserSettings() ?: UserSettings()
+        
         _uiState.update { state ->
             state.copy(
+                config = state.config.copy(
+                    workMinutes = savedSettings.workMinutes,
+                    shortBreakMinutes = savedSettings.breakMinutes
+                ),
+                timeLeft = if (!state.isActive) {
+                    state.currentMode.totalSeconds(state.config.copy(
+                        workMinutes = savedSettings.workMinutes,
+                        shortBreakMinutes = savedSettings.breakMinutes
+                    ))
+                } else state.timeLeft,
+                selectedBackgroundId = savedSettings.selectedBackgroundId ?: state.selectedBackgroundId ?: BackgroundRepository.DEFAULT_BACKGROUND_ID,
+                isNotificationEnabled = savedSettings.isNotificationEnabled,
+                isCompactMode = savedSettings.isCompactMode,
                 availableTracks = MusicRepository.availableTracks,
-                // Chỉ set mặc định nếu state được truyền vào chưa có bài nào được chọn
-                selectedTrackId = initialState.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID,
+                selectedTrackId = state.selectedTrackId ?: MusicRepository.DEFAULT_TRACK_ID,
                 availableAmbientSounds = AmbientSoundRepository.availableSounds,
-                availableBackgrounds = BackgroundRepository.availableBackgrounds,
-                selectedBackgroundId = initialState.selectedBackgroundId ?: BackgroundRepository.DEFAULT_BACKGROUND_ID
+                availableBackgrounds = BackgroundRepository.availableBackgrounds
             )
         }
 
-        if (initialState.isActive) {
-            resumeTimerAfterRestore()
+        // Load tasks and today's stats from repository
+        viewModelScope.launch {
+            repository?.getAllTasks()?.collect { tasks ->
+                _uiState.update { it.copy(tasks = tasks) }
+            }
+        }
+
+        viewModelScope.launch {
+            repository?.getTodayStats()?.collect { stats ->
+                if (stats != null) {
+                    _uiState.update { it.copy(pomodorosToday = stats.sessionsCompleted) }
+                }
+            }
         }
     }
 
@@ -188,11 +221,39 @@ class PomodoroViewModel(
             // Nếu vừa học xong: Tăng số Pomo trong ngày và chuyển sang Nghỉ ngắn
             val nextMode = PomodoroMode.SHORT_BREAK
             val nextTime = nextMode.totalSeconds(currentState.config)
+            
+            // Save Session and Stats
+            viewModelScope.launch {
+                repository?.saveSession(
+                    SessionRecord(
+                        id = Random.nextInt().toString(),
+                        startTime = getCurrentDateTimeString(),
+                        endTime = getCurrentDateTimeString(),
+                        mode = PomodoroMode.WORK.name,
+                        durationMinutes = currentState.config.workMinutes,
+                        status = "COMPLETED",
+                        tasksCompletedCount = currentState.tasks.count { it.isCompleted }
+                    )
+                )
+                repository?.incrementDailyStats(
+                    sessionsCompleted = 1,
+                    focusMinutes = currentState.config.workMinutes,
+                    tasksCompleted = currentState.tasks.count { it.isCompleted }
+                )
+            }
+            
             listOf(nextMode, nextTime, EventType.WORK_END, "Work session completed. Time for a break!")
         } else {
             // Nếu vừa nghỉ xong: Quay trở lại chế độ Tập trung
             val nextMode = PomodoroMode.WORK
             val nextTime = nextMode.totalSeconds(currentState.config)
+            
+            viewModelScope.launch {
+                repository?.incrementDailyStats(
+                    breakMinutes = currentState.config.shortBreakMinutes
+                )
+            }
+
             listOf(nextMode, nextTime, EventType.BREAK_END, "Break finished. Time to focus again!")
         }
 
@@ -214,12 +275,22 @@ class PomodoroViewModel(
     fun addTask() {
         val text = _uiState.value.newTaskText
         if (text.isNotBlank()) {
+            val taskId = Random.nextInt().toString()
+            val newTask = Task(
+                id = taskId,
+                text = text,
+                createdAt = getCurrentDateTimeString()
+            )
+            
             _uiState.update {
-                val newTask = Task(id = Random.nextInt().toString(), text = text)
                 it.copy(
                     tasks = it.tasks + newTask,
                     newTaskText = ""
                 )
+            }
+            
+            viewModelScope.launch {
+                repository?.saveTask(newTask)
             }
         }
     }
@@ -228,15 +299,31 @@ class PomodoroViewModel(
         _uiState.update { state ->
             state.copy(tasks = state.tasks.filter { it.id != taskId })
         }
+        viewModelScope.launch {
+            repository?.deleteTask(taskId)
+        }
     }
 
     fun toggleTask(taskId: String) {
+        var updatedTask: Task? = null
         _uiState.update { state ->
             state.copy(
                 tasks = state.tasks.map {
-                    if (it.id == taskId) it.copy(isCompleted = !it.isCompleted) else it
+                    if (it.id == taskId) {
+                        val newStatus = !it.isCompleted
+                        updatedTask = it.copy(
+                            isCompleted = newStatus,
+                            completedAt = if (newStatus) getCurrentDateTimeString() else null
+                        )
+                        updatedTask!!
+                    } else it
                 }
             )
+        }
+        updatedTask?.let { task ->
+            viewModelScope.launch {
+                repository?.saveTask(task)
+            }
         }
     }
 
@@ -285,6 +372,9 @@ class PomodoroViewModel(
 
     fun selectBackground(backgroundId: String) {
         _uiState.update { it.copy(selectedBackgroundId = backgroundId) }
+        repository?.let { repo ->
+            repo.saveUserSettings(repo.getUserSettings().copy(selectedBackgroundId = backgroundId))
+        }
     }
 
     fun toggleTasksExpanded() {
@@ -341,6 +431,15 @@ class PomodoroViewModel(
 
         updateConfig(newConfig)
         _uiState.update { it.copy(isSettingsVisible = false) }
+
+        // Save to repository
+        repository?.let { repo ->
+            val currentSettings = repo.getUserSettings()
+            repo.saveUserSettings(currentSettings.copy(
+                workMinutes = workMin,
+                breakMinutes = breakMin
+            ))
+        }
     }
 
     fun resetSettingsToDefault() {
@@ -358,7 +457,13 @@ class PomodoroViewModel(
     }
 
     fun toggleCompactMode() {
-        _uiState.update { it.copy(isCompactMode = !it.isCompactMode, isCompactMenuExpanded = false) }
+        _uiState.update { state ->
+            val newValue = !state.isCompactMode
+            repository?.let { repo ->
+                repo.saveUserSettings(repo.getUserSettings().copy(isCompactMode = newValue))
+            }
+            state.copy(isCompactMode = newValue, isCompactMenuExpanded = false)
+        }
     }
 
     fun toggleCompactMenu() {
@@ -370,7 +475,13 @@ class PomodoroViewModel(
     }
 
     fun toggleNotificationEnabled() {
-        _uiState.update { it.copy(isNotificationEnabled = !it.isNotificationEnabled) }
+        _uiState.update { state ->
+            val newValue = !state.isNotificationEnabled
+            repository?.let { repo ->
+                repo.saveUserSettings(repo.getUserSettings().copy(isNotificationEnabled = newValue))
+            }
+            state.copy(isNotificationEnabled = newValue)
+        }
     }
 
     fun clearPendingNotification() {

@@ -39,8 +39,7 @@ fun CompactFloatingTimer(
     height: Dp = 64.dp,
     timeFontSize: androidx.compose.ui.unit.TextUnit = 20.sp,
     buttonSize: Dp = 36.dp,
-    showExtraButtons: Boolean = false,
-    onSettingsClick: () -> Unit = {},
+    showExitShortcut: Boolean = false,
     onExitClick: () -> Unit = {}
 ) {
     val minutes = (timeLeft / 60).toString().padStart(2, '0')
@@ -62,7 +61,7 @@ fun CompactFloatingTimer(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (showExtraButtons) {
+        if (showExitShortcut) {
             IconButton(
                 onClick = onExitClick,
                 modifier = Modifier
@@ -116,17 +115,6 @@ fun CompactFloatingTimer(
                         modifier = Modifier.size(buttonSize * 0.6f)
                     )
                 }
-            }
-        }
-
-        if (showExtraButtons) {
-            IconButton(
-                onClick = onSettingsClick,
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.White.copy(alpha = 0.1f), CircleShape)
-            ) {
-                Icon(Icons.Default.Settings, "Settings", tint = Color.White)
             }
         }
     }
@@ -279,49 +267,8 @@ fun CompactSectionOverlay(
                     shape = RoundedCornerShape(28.dp),
                     backgroundColor = AuraColors.BottomBarBackground.copy(alpha = 0.95f)
                 ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        // Title Header inside the overlay
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = when (activeSection) {
-                                    CompactSection.TASKS -> "Danh sách công việc"
-                                    CompactSection.MUSIC -> "Nhạc tập trung"
-                                    CompactSection.BACKGROUND -> "Đổi hình nền"
-                                    CompactSection.AMBIENT -> "Âm thanh môi trường"
-                                    CompactSection.SETTINGS -> "Cài đặt Timer"
-                                    null -> ""
-                                },
-                                color = Color.White,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-
-                            IconButton(
-                                onClick = onClose,
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = "Close",
-                                    tint = Color.White.copy(alpha = 0.6f),
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                        ) {
-                            activeSection?.let { content(it) }
-                        }
+                    Box(modifier = Modifier.fillMaxSize().padding(20.dp)) {
+                        activeSection?.let { content(it) }
                     }
                 }
             }

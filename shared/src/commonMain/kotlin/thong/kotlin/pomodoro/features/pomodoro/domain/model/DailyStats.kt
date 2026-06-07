@@ -1,0 +1,9 @@
+package thong.kotlin.pomodoro.features.pomodoro.domain.model
+
+data class DailyStats(
+    val date: String, // YYYY-MM-DD
+    val sessionsCompleted: Int = 0,
+    val focusMinutes: Int = 0,
+    val breakMinutes: Int = 0,
+    val tasksCompleted: Int = 0
+)

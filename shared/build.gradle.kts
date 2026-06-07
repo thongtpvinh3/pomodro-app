@@ -51,6 +51,10 @@ kotlin {
         }
         jvmMain.dependencies {
             implementation(libs.jlayer)
+            implementation(libs.sqldelight.sqlite)
+        }
+        iosMain.dependencies {
+            implementation(libs.sqldelight.native)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -63,6 +67,9 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(compose.materialIconsExtended)
             implementation(libs.sqldelight.coroutines)
+            implementation(libs.multiplatformSettings)
+            implementation(libs.multiplatformSettings.no.arg)
+            implementation(libs.multiplatformSettings.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -74,14 +81,14 @@ kotlin {
     }
 }
 
-//sqldelight {
-//    databases {
-//        create("AuraDatabase") {
-//            // Package chứa các class Kotlin được tự động sinh ra
-//            packageName.set("com.aura.pomodoro.core.database")
-//        }
-//    }
-//}
+sqldelight {
+    databases {
+        create("AuraDatabase") {
+            // Package chứa các class Kotlin được tự động sinh ra
+            packageName.set("thong.kotlin.pomodoro.database")
+        }
+    }
+}
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
