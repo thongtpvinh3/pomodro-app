@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 
 import thong.kotlin.pomodoro.core.media.AndroidSoundManager
 import thong.kotlin.pomodoro.core.notification.AndroidNotificationManager
+import thong.kotlin.pomodoro.database.initDatabaseContext
 
 class MainActivity : ComponentActivity() {
 
@@ -29,6 +30,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        
+        // Khởi tạo Database context
+        initDatabaseContext(this)
 
         // Yêu cầu quyền thông báo trên Android 13+
         requestNotificationPermission()

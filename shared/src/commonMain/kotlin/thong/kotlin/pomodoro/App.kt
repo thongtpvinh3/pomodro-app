@@ -20,6 +20,7 @@ import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiState
 import thong.kotlin.pomodoro.features.pomodoro.timer.state.PomodoroUiStateSaver
 import thong.kotlin.pomodoro.features.pomodoro.timer.viewmodel.PomodoroViewModel
 import thong.kotlin.pomodoro.core.notification.NotificationManager
+import thong.kotlin.pomodoro.di.DependencyRegistry
 
 @Composable
 @Preview
@@ -28,6 +29,8 @@ fun App(
     notificationManager: NotificationManager? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val repository = remember { DependencyRegistry.userAppStateRepository }
+
     var currentScreenName by rememberSaveable {
         mutableStateOf("Splash")
     }
@@ -49,6 +52,7 @@ fun App(
         PomodoroViewModel(
             viewModelScope = coroutineScope,
             soundManager = soundManager,
+            repository = repository,
             initialState = savedPomodoroState
         )
     }

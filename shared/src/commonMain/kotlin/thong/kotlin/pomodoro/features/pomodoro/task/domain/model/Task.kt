@@ -6,5 +6,8 @@ import androidx.compose.runtime.Immutable
 data class Task(
     val id: String,
     val text: String,
-    val isCompleted: Boolean = false
+    val isCompleted: Boolean = false,
+    val createdAt: String = "",
+    val completedAt: String? = null,
+    val sessionId: String? = null
 )
