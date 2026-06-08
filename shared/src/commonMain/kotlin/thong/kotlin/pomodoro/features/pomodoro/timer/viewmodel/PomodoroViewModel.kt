@@ -452,6 +452,21 @@ class PomodoroViewModel(
         }
     }
 
+    fun hardResetData() {
+        viewModelScope.launch {
+            repository?.clearAllData()
+            // In a real app, we might want to trigger a restart or navigate to Splash.
+            // For now, we'll at least reset the current UI state to defaults.
+            _uiState.update { 
+                PomodoroUiState().copy(
+                    availableTracks = MusicRepository.availableTracks,
+                    availableAmbientSounds = AmbientSoundRepository.availableSounds,
+                    availableBackgrounds = BackgroundRepository.availableBackgrounds
+                )
+            }
+        }
+    }
+
     fun updateBackgroundConfig(config: thong.kotlin.pomodoro.features.background.model.BackgroundConfig) {
         _uiState.update { it.copy(backgroundConfig = config) }
     }

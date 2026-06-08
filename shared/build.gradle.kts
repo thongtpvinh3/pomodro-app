@@ -22,6 +22,7 @@ kotlin {
     
     jvm()
     
+    /*
     js {
         browser()
     }
@@ -30,6 +31,7 @@ kotlin {
     wasmJs {
         browser()
     }
+    */
     
     androidLibrary {
        namespace = "thong.kotlin.pomodoro.shared"
@@ -75,9 +77,11 @@ kotlin {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
         }
+        /*
         jsMain.dependencies {
             implementation(libs.wrappers.browser)
         }
+        */
     }
 }
 

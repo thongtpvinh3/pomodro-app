@@ -20,9 +20,16 @@ compose.desktop {
         mainClass = "thong.kotlin.pomodoro.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Exe, TargetFormat.Msi)
             packageName = "thong.kotlin.pomodoro"
             packageVersion = "1.0.0"
+
+            modules("java.sql")
+
+            windows {
+                menu = true
+                // iconFile.set(project.file("src/main/resources/icon.ico"))
+            }
         }
     }
 }

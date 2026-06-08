@@ -22,6 +22,7 @@ class LocalSettingsDataSource(private val settings: Settings) {
         private const val KEY_COMPACT_MODE = "compact_mode"
         private const val KEY_MINIMAL_MODE = "minimal_mode"
         private const val KEY_BATTERY_SAVER = "battery_saver"
+        private const val KEY_HAS_COMPLETED_ONBOARDING = "has_completed_onboarding"
     }
 
     fun getUserSettings(): UserSettings {
@@ -37,7 +38,8 @@ class LocalSettingsDataSource(private val settings: Settings) {
             isVibrationEnabled = settings.getBoolean(KEY_VIBRATION_ENABLED, true),
             isCompactMode = settings.getBoolean(KEY_COMPACT_MODE, false),
             isMinimalMode = settings.getBoolean(KEY_MINIMAL_MODE, false),
-            isBatterySaverEnabled = settings.getBoolean(KEY_BATTERY_SAVER, false)
+            isBatterySaverEnabled = settings.getBoolean(KEY_BATTERY_SAVER, false),
+            hasCompletedOnboarding = settings.getBoolean(KEY_HAS_COMPLETED_ONBOARDING, false)
         )
     }
 
@@ -54,6 +56,11 @@ class LocalSettingsDataSource(private val settings: Settings) {
         settings[KEY_COMPACT_MODE] = userSettings.isCompactMode
         settings[KEY_MINIMAL_MODE] = userSettings.isMinimalMode
         settings[KEY_BATTERY_SAVER] = userSettings.isBatterySaverEnabled
+        settings[KEY_HAS_COMPLETED_ONBOARDING] = userSettings.hasCompletedOnboarding
+    }
+
+    fun clear() {
+        settings.clear()
     }
 
     fun getSettingsFlow(): Flow<UserSettings> {

@@ -83,12 +83,15 @@ fun App(
                 is AuraScreen.Splash -> {
                     LaunchedEffect(Unit) {
                         delay(5000)
-                        currentScreenName = "Onboarding"
+                        val hasCompletedOnboarding = repository.getUserSettings().hasCompletedOnboarding
+                        currentScreenName = if (hasCompletedOnboarding) "MainApp" else "Onboarding"
                     }
                     StartupScreen()
                 }
                 is AuraScreen.Onboarding -> {
                     OnboardingScreen(onFinish = {
+                        val currentSettings = repository.getUserSettings()
+                        repository.saveUserSettings(currentSettings.copy(hasCompletedOnboarding = true))
                         currentScreenName = "MainApp"
                     })
                 }

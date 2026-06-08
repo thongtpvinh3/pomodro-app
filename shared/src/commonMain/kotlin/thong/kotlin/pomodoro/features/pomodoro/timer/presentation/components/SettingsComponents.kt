@@ -28,7 +28,8 @@ fun PomodoroSettingsModal(
     onBreakChange: (String) -> Unit,
     onSave: () -> Unit,
     onCancel: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onHardReset: () -> Unit = {}
 ) {
     // Semi-transparent background overlay
     Box(
@@ -55,7 +56,8 @@ fun PomodoroSettingsModal(
                 onWorkChange = onWorkChange,
                 onBreakChange = onBreakChange,
                 onSave = onSave,
-                onReset = onReset
+                onReset = onReset,
+                onHardReset = onHardReset
             )
         }
     }
@@ -67,7 +69,8 @@ fun SettingsContent(
     onWorkChange: (String) -> Unit,
     onBreakChange: (String) -> Unit,
     onSave: () -> Unit,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onHardReset: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -158,6 +161,17 @@ fun SettingsContent(
             ) {
                 Text("Lưu", fontWeight = FontWeight.Bold)
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Hard Reset Button
+        TextButton(
+            onClick = onHardReset,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f))
+        ) {
+            Text("Xóa tất cả dữ liệu & Cài đặt", fontSize = 12.sp)
         }
     }
 }

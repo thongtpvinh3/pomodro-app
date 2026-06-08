@@ -12,5 +12,6 @@ data class UserSettings(
     val isVibrationEnabled: Boolean = true,
     val isCompactMode: Boolean = false,
     val isMinimalMode: Boolean = false,
-    val isBatterySaverEnabled: Boolean = false
+    val isBatterySaverEnabled: Boolean = false,
+    val hasCompletedOnboarding: Boolean = false
 )

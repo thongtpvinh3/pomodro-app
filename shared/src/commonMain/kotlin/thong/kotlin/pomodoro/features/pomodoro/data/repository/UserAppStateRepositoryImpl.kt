@@ -133,6 +133,11 @@ class UserAppStateRepositoryImpl(
         // But since I simplified the queries, I'll do it here for now.
     }
 
+    override suspend fun clearAllData() {
+        localDb.clearAllData()
+        localSettings.clear()
+    }
+
     private fun getTodayDateString(): String {
         return getCurrentDateString()
     }

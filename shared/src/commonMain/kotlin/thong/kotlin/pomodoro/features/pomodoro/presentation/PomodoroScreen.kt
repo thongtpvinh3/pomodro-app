@@ -211,7 +211,8 @@ fun PomodoroScreenResponsive(
                     onBreakChange = viewModel::onBreakMinutesChange,
                     onSave = viewModel::saveSettings,
                     onCancel = viewModel::toggleSettings,
-                    onReset = viewModel::resetSettingsToDefault
+                    onReset = viewModel::resetSettingsToDefault,
+                    onHardReset = viewModel::hardResetData
                 )
             }
         }
