@@ -45,3 +45,13 @@ SELECT * FROM DailyStats WHERE date = ?;
 
 insertOrUpdateStats:
 INSERT OR REPLACE INTO DailyStats VALUES ?;
+
+-- Clear Data
+deleteAllTasks:
+DELETE FROM TaskRecord;
+
+deleteAllSessions:
+DELETE FROM SessionRecord;
+
+deleteAllStats:
+DELETE FROM DailyStats;

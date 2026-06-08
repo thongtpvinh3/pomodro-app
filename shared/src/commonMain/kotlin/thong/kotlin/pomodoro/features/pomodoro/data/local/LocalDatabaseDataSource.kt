@@ -48,4 +48,12 @@ class LocalDatabaseDataSource {
     suspend fun insertOrUpdateStats(record: DailyStats) {
         queries.insertOrUpdateStats(record)
     }
+
+    suspend fun clearAllData() {
+        database.transaction {
+            queries.deleteAllTasks()
+            queries.deleteAllSessions()
+            queries.deleteAllStats()
+        }
+    }
 }

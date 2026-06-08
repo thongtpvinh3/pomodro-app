@@ -31,4 +31,7 @@ interface UserAppStateRepository {
         breakMinutes: Int = 0,
         tasksCompleted: Int = 0
     )
+
+    // Data Management
+    suspend fun clearAllData()
 }
